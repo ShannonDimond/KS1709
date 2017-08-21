@@ -1,0 +1,383 @@
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<!-- Custom styles for this template -->
+<link href="slate.min.css" rel="stylesheet">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript" src="js/utils.js"></script>
+<script type="text/javascript" src="js/reconnecting-websocket.min.js"></script>
+<script type="text/javascript" src="config.js?"></script>
+
+
+<!--------------------------------------------------------
+									Start Presentation
+----------------------------------------------------------
+Processes the Start Presentation Button. Loads the first
+slide as the current slide and buffers the second slide in
+the hidden frame.
+--------------------------------------------------------->
+<script>
+$(document).ready(function() 
+{
+	$("#startPresentation").click(function() 
+	{
+		var firstSlideFilename = $("#filenameHidden").val();
+
+		//Set the Hidden frame to the first slide, then force a swap, making it visable.
+		$.ajax({
+				type: "POST",
+				url: "getNextFile.php",
+				data: {currentSlide: firstSlideFilename},
+				success: function(data)
+				{
+					$("#filenameHidden").val(data);
+					$("#currentSlideHidden").val(data);
+					$("#currentSlideImage").attr('src', 'media/' + data);
+					sendImage();
+					sendSwap(0);
+					
+					//Set the Hidden frame to the next slide, but don't swap.
+					var secondSlideFilename = $("#filenameHidden").val();
+
+					$.ajax({
+							type: "POST",
+							url: "getNextFile.php",
+							data: {currentSlide: secondSlideFilename},
+							success: function(data)
+							{
+								$("#filenameHidden").val(data);
+								$("#slidePreviewHidden").val(data);
+								$("#previewSlideImage").attr('src', 'media/' + data);
+								sendImage();
+							}
+					});
+				}
+		});	
+	});
+});
+</script>
+
+
+<!--------------------------------------------------------
+								Process Next Slide
+----------------------------------------------------------
+Processes the Next Button. Swaps the hidden frame to the
+current visable frame and then buffers the next slide in
+the hidden frame.
+--------------------------------------------------------->
+<script>
+$(document).ready(function() 
+{
+	$("#nextSlide").click(function() 
+	{
+		var currentSlide = $("#filenameHidden").val();
+
+		
+
+		//Swaps the frames, then sets the hidden frame to the next slide
+		$.ajax({
+				type: "POST",
+				url: "getNextFile.php",
+				data: {currentSlide: currentSlide},
+				success: function(data)
+				{
+					$("#filenameHidden").val(data);
+					$("#slidePreviewHidden").val(data);
+					sendSwap(0);
+					sendImage();
+					$("#currentSlideImage").attr('src', 'media/' + currentSlide);
+					$("#previewSlideImage").attr('src', 'media/' + data);
+					$("#currentSlideHidden").val(currentSlide);
+				}
+		});	
+	});
+});
+</script>
+
+
+<!--------------------------------------------------------
+								Process Previous Slide
+----------------------------------------------------------
+Processes the Previous Button. Loads the previous slide 
+into the hidden frame then swaps the hidden frame to the
+current frame. Doesn't pre-buffer.
+It then determines what the next slide will be and buffers
+it in the hidden frame.
+--------------------------------------------------------->
+<script>
+$(document).ready(function() 
+{
+	$("#previousSlide").click(function() 
+	{
+		var currentSlide = $("#filenameHidden").val();
+
+		//Sets the hidden frame to the previous slide, then loads previous slide
+		$.ajax({
+				type: "POST",
+				url: "getPreviousFile.php",
+				data: {currentSlide: currentSlide, isPreview: 'False'},
+				success: function(data)
+				{			
+					$("#filenameHidden").val(data);
+					sendImage();
+					sendSwap(0);
+				
+					//Sets the hidden frame to the next slide
+					var currentSlide = $("#filenameHidden").val();
+		
+					$.ajax({
+							type: "POST",
+							url: "getNextFile.php",
+							data: {currentSlide: currentSlide, isPreview: 'False'},
+							success: function(data)
+							{
+								$("#filenameHidden").val(data);
+								sendImage(); //May be redundant, NEEDS CHECKING!!!
+								$("#slidePreviewHidden").val(data);
+								$("#previewSlideImage").attr('src', 'media/' + data);	
+								
+
+								//Set the CurrentSlideHidden text box & change current slide image
+								var currentSlide = $("#currentSlideHidden").val();
+		
+								$.ajax({
+										type: "POST",
+										url: "getPreviousFile.php",
+										data: {currentSlide: currentSlide, isPreview: 'True'},
+										success: function(data)
+										{											
+											$("#currentSlideHidden").val(data);
+											$("#currentSlideImage").attr('src', 'media/' + data);		
+																
+										}
+								});	
+							}
+					});	
+				}
+		});	
+	});
+});
+</script>
+
+<!--------------------------------------------------------
+								Process Preview Next
+----------------------------------------------------------
+Processes the Preview Next Button. It changes the display
+image to the next slide, then tracks what the next slide is.
+--------------------------------------------------------->
+<script>
+$(document).ready(function() 
+{
+	$("#nextSlidePreview").click(function() 
+
+	{
+		var currentSlide = $("#slidePreviewHidden").val();
+
+		//Swaps the frames, then sets the hidden frame to the next slide
+		$.ajax({
+				type: "POST",
+				url: "getNextFile.php",
+				data: {currentSlide: currentSlide},
+				success: function(data)
+				{
+					$("#slidePreviewHidden").val(data);
+					$("#previewSlideImage").attr('src', 'media/' + data);
+				}
+		});	
+	});
+});
+</script>
+
+<!--------------------------------------------------------
+								Process Preview Previous
+----------------------------------------------------------
+Processes the Preview previous Button. It changes the 
+display image to the previous slide, then tracks what the 
+previous slide is.
+--------------------------------------------------------->
+<script>
+$(document).ready(function() 
+{
+	$("#previousSlidePreview").click(function() 
+	{
+		var currentSlide = $("#slidePreviewHidden").val();
+
+		//Swaps the frames, then sets the hidden frame to the next slide
+		$.ajax({
+				type: "POST",
+				url: "getPreviousFile.php",
+				data: {currentSlide: currentSlide, isPreview: 'True'},
+				success: function(data)
+				{
+					$("#slidePreviewHidden").val(data);
+					$("#previewSlideImage").attr('src', 'media/' + data);
+				}
+		});	
+	});
+});
+</script>
+
+<!--------------------------------------------------------
+								Process Set Current Slide
+----------------------------------------------------------
+Sets the current slide in the preview pane to be the current
+display slide. It sets the hidden frame to the current preview
+slide, then swaps the frams, then sets the hidden frame to 
+the next frame to buffer it.
+This method currently doesn't buffer the slide that is being 
+set to be displayed.
+
+DEVELOPER NOTES: Will require 3 frames, perhaps a possible 
+solution to be implemented later.
+--------------------------------------------------------->
+<script>
+$(document).ready(function() 
+{
+	$("#setSlide").click(function() 
+	{
+		var currentSlide = $("#slidePreviewHidden").val();
+
+		//Set the hidden frame to the current preview slide
+		$.ajax({
+				type: "POST",
+				url: "getNextFile.php",
+				data: {currentSlide: currentSlide},
+				success: function(data)
+				{
+					$("#filenameHidden").val(currentSlide);
+					sendImage();
+					sendSwap(0);
+					$("#filenameHidden").val(data);
+					sendImage();
+					$("#previewSlideImage").attr('src', 'media/' + data);
+					$("#currentSlideImage").attr('src', 'media/' + currentSlide);
+					$("#currentSlideHidden").val(currentSlide);
+				}
+		});	
+	});
+});
+</script>
+
+<script type="text/javascript">
+var delay = 1500;
+var sendVideoTimer;
+var sendVideoDelay = 30;
+
+function initialise() {
+
+  connectToRelay();
+
+  function handleMesg( data ) {
+    //console.log('data:' + data);
+    var cmd = data.charAt(0);
+
+    if (data.length > 1) { // command with argument
+      var arg = data.substring(1, data.length);
+      switch (cmd) {
+        case 'Y':
+          //console.log('ytTime:' + arg);
+          //handleYoutubeTime(arg);
+          break;
+      }
+    }
+  }
+}
+
+function sendURL( url ) {
+	// add check if URL exists
+	socketSend( 'U' + url );
+}
+
+function sendHTML( html ) {
+	// add HTML sanity check?
+	socketSend( 'H' + html );
+}
+
+function sendImage() 
+{
+	//setTimeout(function()
+	//{
+		socketSend( 'I' +  document.getElementById("filenameHidden").value);
+	//},100);
+}
+
+function sendVideo( video ) {
+	// add check if vidURL exists
+	socketSend( 'V' + video );
+}
+
+function sendReload() {
+  socketSend('R');
+}
+
+function sendSwap( delay ) {
+  if (delay && delay > 0) {
+    window.setTimeout(function() { socketSend( "S" );}, delay);
+  } else {
+    socketSend( "S" );
+  }
+}
+
+</script>
+
+
+<style type="text/css">
+</style>
+</head>
+<body onLoad="initialise()">
+<br>
+<div align=center>
+    <h1>WebPresent Controller</h1>
+</div>
+<div class="container">
+  	<div class="row">
+    	<div class="col-md-5">
+			<h3>Current Slide</h3>
+        	<iframe src="media/test1.jpg" id="currentSlideImage" height="160" width="250" allowtransparency="true"></iframe>
+        	</br></br>
+        	<input type="button" class="btn btn-primary btn-md" value="Play" onclick="sendVideo('play');" />
+        	<input type="button" class="btn btn-primary btn-md" value="Pause" onclick="sendVideo('pause');" />
+        	<input type="button" class="btn btn-primary btn-md" value="Mute" onclick="sendVideo('mute');" />
+        	</br></br>
+					<input type="button" class="btn btn-primary btn-md" value="Start Presentation" id="startPresentation"/>
+        	<input type="button" class="btn btn-primary btn-md" value="Previous" id="previousSlide"/>
+					<input type="button" class="btn btn-primary btn-md" value="Next" id="nextSlide"/>
+					<input type="button" class="btn btn-primary btn-md" value="Send Swap (Test)" onclick="sendSwap(0);" />
+					<br/><br/>
+					<input type="text" id="filenameHidden" value="" />
+					<input type="text" id="currentSlideHidden" value="" />
+		</div>
+		<div class="col-md-2">
+    	</div>
+    	<div class="col-md-5">
+        	<h3>Next Slide</h3>
+        	<iframe src="media/test2.jpg" id="previewSlideImage" height="160" width="250" allowtransparency="true"></iframe>
+			</br></br>
+			<input type="button" style="color: transparent; background-color: transparent; border-color: transparent; cursor: default;" />
+        	<input type="button" style="color: transparent; background-color: transparent; border-color: transparent; cursor: default;" />
+			<input type="button" style="color: transparent; background-color: transparent; border-color: transparent; cursor: default;" />
+			</br></br>
+        	<input type="button" class="btn btn-primary btn-md" value="Preview Previous" id="previousSlidePreview"/>
+        	<input type="button" class="btn btn-primary btn-md" value="Preview Next" id="nextSlidePreview" />
+					<input type="button" class="btn btn-primary btn-md" value="Set Current Slide" id="setSlide" />
+					<br/><br/>
+					<input type="text" id="slidePreviewHidden" value="" />
+			<br/><br/>
+			</br></br>
+		</div>
+	</div>
+</div>
+<div align=center>
+	<input type='button' value='Relay Not OK' style='background-color:#ff8080' id='RelayStatus' />
+</div>
+<!-- Config from settings.js
+<pre><div id="config"></div></pre> -->
+</body>
+</html>
