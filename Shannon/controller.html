@@ -11,6 +11,9 @@
 <!-- Custom styles for this template -->
 <link href="slate.min.css" rel="stylesheet">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript">
+var key = ["Slide1","Slide2","Slide3","Slide4","Slide5"];
+</script>
 <script type="text/javascript" src="js/utils.js"></script>
 <script type="text/javascript" src="js/reconnecting-websocket.min.js"></script>
 <script type="text/javascript" src="config.js?"></script>
@@ -355,7 +358,7 @@ function sendSwap( delay ) {
 					<input type="text" style="color: transparent; background-color: transparent; border-color: transparent; id="filenameHidden" value="" />
 					<input type="text" style="color: transparent; background-color: transparent; border-color: transparent; id="currentSlideHidden" value="" />
 		</div>
-		<div class="col-md-2">
+		<div class="col-md-1">
     	</div>
     	<div class="col-md-5">
         	<h3>Next Slide</h3>
@@ -372,6 +375,16 @@ function sendSwap( delay ) {
 					<input type="text" style="color: transparent; background-color: transparent; border-color: transparent; id="slidePreviewHidden" value="" />
 			<br/><br/>
 			</br></br>
+		</div>
+		<div class ="col-md-1">
+		    <script type="text/javascript">
+                for(var i = 0; i < key.length; i++)
+                { 
+                    document.write("<div>");
+                    document.write("<input type='button' class='btn btn-primary btn-md' value='" + key[i] + "'/>");
+                    document.write("</div>");
+                }
+            </script>
 		</div>
 	</div>
 </div>
