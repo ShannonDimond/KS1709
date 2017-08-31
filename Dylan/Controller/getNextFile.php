@@ -3,6 +3,7 @@
 $currentSlide = $_POST['currentSlide'];
 
 $nextSlide = "";
+$fileType = "";
 $count = 0;
 $fileIndex = 0;
 $endOfFile = True;
@@ -10,18 +11,20 @@ $endOfFile = True;
 $slide[] = "Slide1.JPG";
 $slide[] = "Slide2.JPG";
 $slide[] = "Slide3.JPG";
+$slide[] = "Jay.mp4";
+$slide[] = "Widevision.mp4";
 $slide[] = "Slide4.JPG";
 $slide[] = "Slide5.JPG";
 
 if ($currentSlide == "") 
 {
-	//$myObj->filename = $slide[0];
 	$endOfFile = false;
-	$nextSlide =  $slide[0];
+	$nextSlide =  $slide[0];	
 }
 
 else 
 {
+	//Find the next file
   foreach($slide as $slideFilename) 
 	{
 		$count++;
@@ -33,7 +36,6 @@ else
 		}
 		else if ($count == $fileIndex)
 		{
-			//$myObj->filename = $slideFilename;
 			$endOfFile = false;
 			$nextSlide = $slideFilename;
     } 
@@ -42,10 +44,15 @@ else
 
 if ($endOfFile)
 {
-	//$myObj->filename = 'endOfFile.jpg';
 	$nextSlide = 'endOfFile.jpg';
 }
 
-echo $nextSlide;
-//$myJSON = json_encode($myObj);
-//echo $myJSON;
+//Get the tye of the next file
+$path_parts = pathinfo($nextSlide);
+$fileType = $path_parts['extension'];
+
+echo json_encode(
+	array("filename" => $nextSlide,
+				"fileType" => $fileType)
+);
+

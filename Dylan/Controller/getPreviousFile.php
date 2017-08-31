@@ -1,11 +1,10 @@
-
-
 <?php 
 //CURRENT ISSUE: Cant previous if previous was done from endOfFile.jpg.
 $currentSlide = $_POST['currentSlide'];
 $isPreview = $_POST['isPreview'];
 
 $previousSlide = "";
+$fileType = "";
 $count = 0;
 $fileIndex = 0;
 $endOfFile = True;
@@ -13,18 +12,20 @@ $endOfFile = True;
 $slide[] = "Slide1.JPG";
 $slide[] = "Slide2.JPG";
 $slide[] = "Slide3.JPG";
+$slide[] = "Jay.mp4";
+$slide[] = "Widevision.mp4";
 $slide[] = "Slide4.JPG";
 $slide[] = "Slide5.JPG";
 
 if ($currentSlide == "") 
 {
-	//$myObj->filename = $slide[0];
 	$endOfFile = false;
 	$previousSlide =  $slide[0];
 }
 
 else 
 {
+	//Find the previous file
   foreach($slide as $slideFilename) 
 	{    
 		if ($slideFilename == $currentSlide) 
@@ -66,6 +67,11 @@ if ($endOfFile)
 	$previousSlide = $slide[$fileIndex];
 }
 
-echo $previousSlide;
-//$myJSON = json_encode($myObj);
-//echo $myJSON;
+//Get the tye of the previous file
+$path_parts = pathinfo($previousSlide);
+$fileType = $path_parts['extension'];
+
+echo json_encode(
+	array("filename" => $previousSlide,
+				"fileType" => $fileType)
+);
