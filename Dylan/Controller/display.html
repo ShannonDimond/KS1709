@@ -59,23 +59,22 @@ function initialise() {
 
   function handleSwap() 
 	{
-    console.log("pre-swap visFrame:"+visFrame);
-    console.log("pre-swap hidFrame:"+hidFrame);
+    //console.log("pre-swap visFrame:"+visFrame);
+    //console.log("pre-swap hidFrame:"+hidFrame);
 
     var toBeHidden = visFrame;
-    window.setTimeout( function() 
-		{ 
-			document.getElementById( toBeHidden ).style.opacity = 0;
-		}, 500);
-
+		var tbh = toBeHidden;
+   
+		var tbh = toBeHidden; // because using this in future
+    window.setTimeout( function() { document.getElementById( tbh ).style.opacity = 0;}, 500);
     document.getElementById( hidFrame ).style.opacity = 1;
     document.getElementById( hidFrame ).style.transition = 'visibility 0s linear 0.5s,opacity 0.5s linear';
 
     var tmpFrame = visFrame;
     visFrame = hidFrame;
     hidFrame = tmpFrame;
-    console.log("post-swap visFrame:"+visFrame);
-    console.log("post-swap hidFrame:"+hidFrame);
+    //console.log("post-swap visFrame:"+visFrame);
+    //console.log("post-swap hidFrame:"+hidFrame);
   }
 
   function handleReload() {
@@ -107,7 +106,7 @@ function initialise() {
   function handleImage( image ) 
 	{
 		console.log("image " + image);
-		handleHTML("<img src='media/"+ image+"'>");
+		handleHTML("<img src='"+ image+"'>");
   }
 
   function handleVideo( vidArg ) {
@@ -137,7 +136,7 @@ function initialise() {
         break;
      default:
        hidFrame = 'vidFrame' + getNextFrameId( visFrame );
-       var vidStr = '<video id="v'+ hidFrame +'" height="100%"><source src="media/'+vidArg+'" type="video/mp4"></video>';
+       var vidStr = '<video id="v'+ hidFrame +'" height="100%"><source src="'+vidArg+'" type="video/mp4"></video>';
        console.log('vidstr '+ vidStr );
        document.getElementById( hidFrame ).innerHTML = vidStr;
        break;
