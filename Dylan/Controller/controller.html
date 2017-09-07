@@ -12,6 +12,9 @@
 <!-- Custom styles for this template -->
 <link href="slate.min.css" rel="stylesheet">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript">
+var key = ["Slide1","Slide2","Slide3","Slide4","Slide5", "Slide6", "Slide7", "Slide8", "Slide9", "Slide10"];
+</script>
 <script type="text/javascript" src="js/utils.js"></script>
 <script type="text/javascript" src="js/reconnecting-websocket.min.js"></script>
 <script type="text/javascript" src="config.js?"></script>
@@ -534,7 +537,7 @@ function sendSwap( delay )
 					<input type="text" id="nextSlideType" value="" />
 					<input type="text" id="currentSlideType" value="" />
 		</div>
-		<div class="col-md-2">
+		<div class="col-md-1">
     	</div>
     	<div class="col-md-5">
         	<h3>Next Slide</h3>
@@ -552,10 +555,24 @@ function sendSwap( delay )
 			<br/><br/>
 			</br></br>
 		</div>
+		<div class ="col-md-1" >
+		    <div style="width: 100px; height: 380px; overflow-y: scroll;">
+		    <script type="text/javascript">
+                for(var i = 0; i < key.length; i++)
+                { 
+                    document.write("<div>");
+                    document.write("<input type='button' class='btn btn-primary btn-md btn-block' value='" + key[i] + "'/>");
+                    document.write("</div>");
+                }
+            </script>
+            </div>
+		</div>
 	</div>
 </div>
 <div align=center>
 	<input type='button' value='Relay Not OK' style='background-color:#ff8080' id='RelayStatus' />
+	</br></br>
+	<input type="button" class="btn btn-primary btn-md" value="Back To Navigation" />
 </div>
 <!-- Config from settings.js
 <pre><div id="config"></div></pre> -->
