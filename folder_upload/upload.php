@@ -1,5 +1,5 @@
 <?php
-$ds = DIRECTORY_SEPARATOR;
+$ds = "/";
 $uploadDir = 'uploads'.$ds;
 $method = $_SERVER['REQUEST_METHOD'];
 
