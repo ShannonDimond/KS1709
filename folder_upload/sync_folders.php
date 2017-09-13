@@ -1,8 +1,13 @@
 <?php
 
-$ds = DIRECTORY_SEPARATOR;
-$uploadDir = 'uploads'.DIRECTORY_SEPARATOR;
+$ds = "/";
+$uploadDir = 'uploads'.$ds;
 $fileName = 'folder_config';
+
+if(!file_exists($fileName)) {
+    $file = fopen($fileName, "w");
+    fclose($file);
+}
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -10,7 +15,7 @@ function getDirContents($dir, &$results = array()){
     $files = scandir($dir);
 
     foreach($files as $key => $value) {
-        $path = $dir.DIRECTORY_SEPARATOR.$value;
+        $path = $dir . "/"   . $value;
         if(!is_dir($path)) {
             $results[] = $path;
         } else if($value != "." && $value != "..") {
@@ -44,7 +49,7 @@ switch($method) {
             $new_dirs[] = $file;
         }
         $config = json_encode($new_dirs, JSON_PRETTY_PRINT);
-
+        $config = str_replace("\/", "/", $config);
         $file = fopen($fileName , "w") or die("Unable to open file!");        
         fwrite($file, $config);
         fclose($file);
@@ -74,7 +79,7 @@ switch($method) {
             // making a new configuration based on the requested folder_order
             foreach($folder_order as $folder_index => $folder_name) {
                 foreach($config as $index => $file_name){
-                    $dir = explode(DIRECTORY_SEPARATOR,$file_name)[1];
+                    $dir = explode($ds,$file_name)[1];
                     if($dir == $folder_name){
                         $new_config[] = $file_name;
                     }
@@ -82,6 +87,7 @@ switch($method) {
             }
         }
         $config = json_encode($new_config, JSON_PRETTY_PRINT);
+        $config = str_replace("\/", "/", $config);
         $file = fopen($fileName , "w") or die("Unable to open file!");        
         fwrite($file, $config);
         fclose($file);
