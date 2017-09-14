@@ -1,8 +1,8 @@
 <?php
 
 $ds = "/";
-$uploadDir = 'Presentation'.$ds;
-$fileName = 'presentationOrder';
+$uploadDir = 'uploads'.$ds;
+$fileName = 'folder_config';
 
 if(!file_exists($fileName)) {
     $file = fopen($fileName, "w");

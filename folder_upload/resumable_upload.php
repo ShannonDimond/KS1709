@@ -19,7 +19,7 @@
  * @email meetbivek@gmail.com
  */
 
- $upload_dir = 'Presentation/';
+ $upload_dir = 'uploads/';
 
 
 ////////////////////////////////////////////////////////////////////
