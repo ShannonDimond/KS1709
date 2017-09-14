@@ -1,0 +1,134 @@
+<html>
+<head>
+<script type="text/javascript" src="js/utils.js"></script>
+<script type="text/javascript" src="js/reconnecting-websocket.min.js"></script>
+<script type="text/javascript" src="config.js?"></script>
+<script type="text/javascript">
+var delay = 1500;
+var sendVideoTimer;
+var sendVideoDelay = 30;
+
+function initialise() {
+
+  connectToRelay();
+
+  function handleMesg( data ) {
+    //console.log('data:' + data);
+    var cmd = data.charAt(0);
+
+    if (data.length > 1) { // command with argument
+      var arg = data.substring(1, data.length);
+      switch (cmd) {
+        case 'Y':
+          //console.log('ytTime:' + arg);
+          //handleYoutubeTime(arg);
+          break;
+      }
+    }
+  }
+
+  function sendBlue() {
+	sendURL("blue.html");
+	window.setTimeout(function(){ sendRed();}, delay);
+  }
+  function sendRed() {
+	sendURL("red.html");
+	window.setTimeout(function(){ sendBlue()}, delay);
+  }
+  function sendRocks() {
+	sendHTML("<img src='images/rocks.jpg'>");
+	window.setTimeout(function(){ sendSky();}, delay);
+  }
+  function sendSky() {
+	sendHTML("<img src='images/sky.jpg'>");
+	window.setTimeout(function(){ sendRocks()}, delay);
+  }
+
+  //window.setTimeout(function(){ sendBlue(); }, delay);
+  //window.setTimeout(function(){ sendRocks(); }, delay);
+  //window.setTimeout(function(){ sendRoad(); }, delay);
+
+  //document.getElementById('config').innerHTML = printConfig();
+
+} // end initialize
+
+function sendURL( url ) {
+	// add check if URL exists
+	socketSend( 'U' + url );
+}
+
+function sendHTML( html ) {
+	// add HTML sanity check?
+	socketSend( 'H' + html );
+}
+
+function sendImage( image ) {
+	// add image sanity check?
+	socketSend( 'I' + image );
+}
+
+function sendVideo( video ) {
+	// add check if vidURL exists
+	socketSend( 'V' + video );
+}
+
+function sendReload() {
+  socketSend('R');
+}
+
+function sendSwap( delay ) {
+  if (delay && delay > 0) {
+    window.setTimeout(function() { socketSend( "S" );}, delay);
+  } else {
+    socketSend( "S" );
+  }
+}
+
+</script>
+<style type="text/css">
+h1 {
+color: white;
+}
+</style>
+</head>
+<body onLoad="initialise()" bgcolor=#000>
+<br>
+<div align=center>
+<h1>WonderWall Control</h1>
+<input type="button" value="Slide 1" onclick="sendURL('media/1-1280.html?');sendSwap(700);">
+<input type="button" value="Slide 2" onclick="sendURL('media/2-1280.html?');sendSwap(700);">
+<input type="button" value="Black" onclick="sendURL('media/black.html?');sendSwap(100);">
+<input type="button" value="Slide 3" onclick="sendURL('media/3-1280.html?');sendSwap(700);">
+<br/><br/>
+<form action=javascript:sendURL(document.getElementById('url').value)>
+<input type="text" name="url" value="1.html" id="url">
+<input type="button" value="Load URL" onclick="sendURL(document.getElementById('url').value);" />
+</form>
+<form action=javascript:sendHTML(document.getElementById('html').value)>
+<input type="text" name="html" value="" id="html">
+<input type="button" value="Load HTML" onclick="sendHTML(document.getElementById('html').value);" />
+</form> 
+<form action=javascript:sendImage(document.getElementById('image').value)>
+<input type="text" name="image" value="" id="image">
+<input type="button" value="Load Image" onclick="sendImage(document.getElementById('image').value);" />
+</form> 
+<form action=javascript:sendVideo(document.getElementById('video').value)>
+<input type="text" name="video" value="Design.mp4" id="video">
+<input type="button" value="Load Video" onclick="sendVideo(document.getElementById('video').value);" /><br><br>
+<input type="button" value="Play Vid" onclick="sendVideo('play');" />
+<input type="button" value="Pause Vid" onclick="sendVideo('pause');" />
+<input type="button" value="Rewind Vid" onclick="sendVideo('rewind');" />
+<input type="button" value="Mute Vid" onclick="sendVideo('mute');" />
+<input type="button" value="Slow Speed" onclick="sendVideo('slow');" />
+<input type="button" value="Normal Speed" onclick="sendVideo('normal');" />
+</form>
+<hr>
+<input type="button" value="SWAP FRAMES" onclick="sendSwap(0);" />
+<input type="button" value="Reload Browsers" onclick="sendReload();" /><br/><br/>
+<input type='button' value='Relay Not OK' style='background-color:#ff8080' id='RelayStatus' />
+</div>
+<!-- Config from settings.js
+<pre><div id="config"></div></pre> -->
+</body>
+</html>
+
