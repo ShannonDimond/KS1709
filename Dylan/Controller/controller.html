@@ -37,6 +37,7 @@ var playVideo = "Play";								//Standard command to Play a video
 var pauseVideo = "Pause";							//Standard command to Pause a video
 var muteVideo = "Mute";								//Standard command to Mute a video
 var unmuteVideo = "Unmute";						//Standard command to Unmute a video
+var endPage = "black.html"						//Black HTML page used to set the screens to black
 //var videoFileTypes[];									//An array to track all the avaliable video types
 //var imageFileTypes[];									//An array to track all the avaliable image types
 
@@ -77,6 +78,8 @@ function startPresentation()
 		}
 	});
 	
+	$("#currentSlideImage").show();
+	
 	//Hide elements based upon fileType, then buffer the slide in the hidden iFrame and dont swap
 	if (nextSlideType == "mp4" | nextSlideType == "webm")
 	{
@@ -108,6 +111,10 @@ $(document).ready(function()
 {
 	$("#loadSlide").click(function() 
 	{
+		//Disable the loadSlide button
+		$("#loadSlide").attr("disabled", true);
+		$("#loadSlide").val("Loading...");
+	
 		if (currentSlideType == 'mp4' || currentSlideType == 'webm')
 		{
 			sendVideoControl(pauseVideo);
@@ -123,42 +130,53 @@ $(document).ready(function()
 		//Set the next slide to the next slide in the presentation play list
 		var presentationOrder = document.getElementById("order").childNodes;
 		var fileFound;
-		var lastSlide;
+		var index;
 
-		for (var index = 0; index < presentationOrder.length; index++) 
+		for (index = 0; index < presentationOrder.length; index++) 
 		{
+			//alert(presentationOrder[index].id);
 			if (currentSlideName == presentationOrder[index].id && !(fileFound))
 			{
 				index++;
-				fileFound = true;
 				if (index < presentationOrder.length) 
-				{
+				{				
+					fileFound = true;
 					nextSlideName = presentationOrder[index].id;
 					nextSlideType = presentationOrder[index].id.substr(presentationOrder[index].id.lastIndexOf('.') + 1);
-					lastSlide = false;
-				}
-				else
-				{
-					nextSlideName = "endOfFile.jpg";
-					nextSlideType = "jpg";
-					lastSlide = true;
 				}
 			}
 		}		
+		
+		//If the next slide is the end of the slide deck, display the last slide again
+		if (!fileFound)
+		{
+			nextSlideName = presentationOrder[presentationOrder.length-1].id;
+			nextSlideType = presentationOrder[presentationOrder.length-1].id.substr(presentationOrder[presentationOrder.length-1].id.lastIndexOf('.') + 1);	
+		}
 		
 		//Set the current slide preview picture
 		if (currentSlideType == "mp4" | currentSlideType == "webm")
 		{
 			$("#currentSlideVideo").attr('src', filePath + currentSlideName);
+			$("#currentSlideHTML").hide();
 			$("#currentSlideImage").hide();
 			$("#currentSlideVideo").show();
+			
 			//DEVELOPER NOTES: NEEDS TO BE CHECKED
 			sendVideoControl(playVideo);
 			sendVideoControl(unmuteVideo);
 		}
-		else 
+		else if (currentSlideType == "html")
+		{
+			$("#currentSlideHTML").attr('src', filePath + currentSlideName);
+			$("#currentSlideHTML").show();
+			$("#currentSlideImage").hide();
+			$("#currentSlideVideo").hide();
+		}
+		else
 		{
 			$("#currentSlideImage").attr('src', filePath + currentSlideName);
+			$("#currentSlideHTML").hide();
 			$("#currentSlideImage").show();
 			$("#currentSlideVideo").hide();
 		}
@@ -166,16 +184,26 @@ $(document).ready(function()
 		//Set the next slide preview picture & buffer slide
 		if (nextSlideType == "mp4" | nextSlideType == "webm")
 		{
+			$("#previewSlideVideo").attr('src', filePath + nextSlideName);
+			$("#previewSlideHTML").hide();
 			$("#previewSlideImage").hide();
 			$("#previewSlideVideo").show();
-			$("#previewSlideVideo").attr('src', filePath + nextSlideName);
 			setTimeout(sendVideo, 1000);
 		}
+		else if (nextSlideType == "html")
+		{
+			$("#previewSlideHTML").attr('src', filePath + nextSlideName);
+			$("#previewSlideHTML").show();
+			$("#previewSlideImage").hide();
+			$("#previewSlideVideo").hide();
+			setTimeout(sendURL, 1000);
+		}	
 		else 
 		{
+			$("#previewSlideImage").attr('src', filePath + nextSlideName);
+			$("#previewSlideHTML").hide();
 			$("#previewSlideImage").show();
 			$("#previewSlideVideo").hide();
-			$("#previewSlideImage").attr('src', filePath + nextSlideName);
 			setTimeout(sendImage, 1000);
 		}	
 			
@@ -191,6 +219,13 @@ $(document).ready(function()
 				$(this).css("color", "white");
 			}
 		});
+		
+		//Enable the loadSlide button
+		setTimeout(function()
+		{ 
+			$("#loadSlide").attr("disabled", false); 
+			$("#loadSlide").val("Load Next Slide");
+		}, 1100);
 	});
 });
 
@@ -226,20 +261,29 @@ function previewSlide(clicked_id)
 		}
 	});
 	
-	//Set preview Images & buffer slide in hidden frame
+	//Set the next slide preview picture & buffer slide
 	if (nextSlideType == "mp4" | nextSlideType == "webm")
 	{
+		$("#previewSlideVideo").attr('src', filePath + nextSlideName);
+		$("#previewSlideHTML").hide();
 		$("#previewSlideImage").hide();
 		$("#previewSlideVideo").show();
-		$("#previewSlideVideo").attr('src', filePath + nextSlideName);
-		
 		setTimeout(sendVideo, 1000);
 	}
+	else if (nextSlideType == "html")
+	{
+		$("#previewSlideHTML").attr('src', filePath + nextSlideName);
+		$("#previewSlideHTML").show();
+		$("#previewSlideImage").hide();
+		$("#previewSlideVideo").hide();
+		setTimeout(sendURL, 1000);
+	}	
 	else 
 	{
+		$("#previewSlideImage").attr('src', filePath + nextSlideName);
+		$("#previewSlideHTML").hide();
 		$("#previewSlideImage").show();
 		$("#previewSlideVideo").hide();
-		$("#previewSlideImage").attr('src', filePath + nextSlideName);
 		setTimeout(sendImage, 1000);
 	}	
 }
@@ -264,10 +308,16 @@ function loadSlidePreview()
 		{
 			var presentationOrder = JSON.parse(this.responseText);
 			var arrayLength = presentationOrder.length;
+			
+			//For each element in the notepad document, add it to the Slide Deck
 			for (index = 0; index < arrayLength; index++) 
 			{
 				document.getElementById("order").innerHTML += ("<input type='button' class='btn btn-primary btn-md btn-block' onClick='previewSlide(this.id)' id='" + presentationOrder[index] + "' value='" + presentationOrder[index] + "' />");  
 			}
+			
+			//Add a Set To Black button to the Slide Deck
+			document.getElementById("order").innerHTML += ("<input type='button' class='btn btn-primary btn-md btn-block' onClick='previewSlide(this.id)' id='" + endPage + "' value='Set To Black'/>");
+			
 		}
 	};
 	xmlhttp.open("GET", "presentationOrder.txt", true);
@@ -319,10 +369,12 @@ function initialise()
 	$("#currentSlideImage").attr('src', filePath + "start.jpg");
 	  
 	//Hide preview frames
+	$("#currentSlideHTML").hide();
+	$("#previewSlideHTML").hide();
+	$("#currentSlideImage").hide();
+	$("#previewSlideImage").hide();
 	$("#currentSlideVideo").hide();
 	$("#previewSlideVideo").hide();
-	$("#currentSlideImage").show();
-	$("#previewSlideImage").show();
 	
 	//STUFF THAT CAN BE DELETED LATER
 	$("#Swap").show();
@@ -335,23 +387,26 @@ function initialise()
 }
 
 /*--------------------------------------------------------
-								SEND URL (MAY BE DELETED)
+													Send URL
 ----------------------------------------------------------
-FILL IN
+The purpose of this function is to send the next HTML slide
+to the display clients. The letter U is the indication to
+client that it is a HTML page/URL. The filepath is appended 
+to it as well as the filename.
 --------------------------------------------------------*/
-function sendURL( url ) 
+function sendURL() 
 {
-	socketSend( 'U' + url );
+	socketSend('U' + filePath + nextSlideName);
 }
 
 /*--------------------------------------------------------
-								SEND HTML (MAY BE DELETED)
+								     SEND HTML (DELETE?)
 ----------------------------------------------------------
 FILL IN
 --------------------------------------------------------*/
-function sendHTML( html ) 
+function sendHTML(html) 
 {
-	socketSend( 'H' + html );
+	socketSend('H' + filePath + nextSlideName);
 }
 
 /*--------------------------------------------------------
@@ -364,11 +419,11 @@ as well as the filename.
 --------------------------------------------------------*/
 function sendImage() 
 {
-	socketSend( 'I' +  filePath + nextSlideName);
+	socketSend('I' +  filePath + nextSlideName);
 }
 
 /*--------------------------------------------------------
-										Send Transition
+										  Send Video
 ----------------------------------------------------------
 The purpose of this function is to send the next video slide
 to the display clients. The letter V is the indication to
@@ -377,7 +432,7 @@ as well as the filename.
 --------------------------------------------------------*/
 function sendVideo() 
 {
-	socketSend( 'V' + filePath + nextSlideName);
+	socketSend('V' + filePath + nextSlideName);
 }
 
 /*--------------------------------------------------------
@@ -390,7 +445,7 @@ appended to it.
 --------------------------------------------------------*/
 function sendTransition(transitionType) 
 {
-	socketSend( 'T' + transitionType);
+	socketSend('T' + transitionType);
 }
 
 /*--------------------------------------------------------
@@ -442,7 +497,7 @@ in control option to the message.
 --------------------------------------------------------*/
 function sendVideoControl(controlOption) 
 {
-	socketSend( 'V' + controlOption);
+	socketSend('V' + controlOption);
 }
 
 /*--------------------------------------------------------
@@ -484,6 +539,7 @@ function sendSwap()
 	<div class="row">
 		<div class="col-md-5">
 			<h3 align="center">Current Slide</h3>
+			<iframe id="currentSlideHTML" src="" height="300" width="450"></iframe>
 			<image id="currentSlideImage" src="" height="300" width="450" allowtransparency="true"></image>
 			<video id='currentSlideVideo' autoplay="autoplay" loop preload="metadata" height="300" width="450" muted controls><source src="" type="video/mp4"></video>
 			</br></br>
@@ -498,6 +554,7 @@ function sendSwap()
 		</div>
 		<div class="col-md-5">
 			<h3 align="center">Next Slide</h3>
+			<iframe id="previewSlideHTML" src="" height="300" width="450"></iframe>
 			<image id="previewSlideImage" src="" height="300" width="450" allowtransparency="true"></image>
 			<video id='previewSlideVideo' loop preload="metadata" height="300" width="450" muted controls><source src="" type="video/mp4"></video>
 			<br/><br/>
