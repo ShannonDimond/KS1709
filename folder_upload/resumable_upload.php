@@ -1,7 +1,7 @@
 <?php
 /**
  * This is the implementation of the server side part of
- * Resumable.js client script, which sends/uploads files
+ * Resumable.js client script, which sends/Presentation files
  * to a server in several chunks.
  *
  * The script receives the files in a standard way as if
@@ -19,7 +19,7 @@
  * @email meetbivek@gmail.com
  */
 
- $upload_dir = 'uploads/';
+ $upload_dir = 'Presentation/';
 
 
 ////////////////////////////////////////////////////////////////////
@@ -106,10 +106,10 @@ function createFileFromChunks($temp_dir, $fileName, $chunkSize, $totalSize,$tota
     // If the Size of all the chunks on the server is equal to the size of the file uploaded.
     if ($total_files_on_server_size >= $totalSize) {
     // create the final destination file ]
-        if (!is_dir(dirname("uploads/".$fileName))) {
-            mkdir(dirname("uploads/".$fileName), 0777, true);
+        if (!is_dir(dirname("Presentation/".$fileName))) {
+            mkdir(dirname("Presentation/".$fileName), 0777, true);
         }
-        if (($fp = fopen("uploads/".$fileName, 'w')) !== false) {
+        if (($fp = fopen("Presentation/".$fileName, 'w')) !== false) {
             for ($i=1; $i<=$total_files; $i++) {
                 fwrite($fp, file_get_contents($temp_dir.'/'.$fileName.'.part'.$i));
                 _log('writing chunk '.$i);
@@ -121,7 +121,7 @@ function createFileFromChunks($temp_dir, $fileName, $chunkSize, $totalSize,$tota
         }
 
         // rename the temporary directory (to avoid access from other 
-        // concurrent chunks uploads) and than delete it
+        // concurrent chunks Presentation) and than delete it
         if (rename($temp_dir, $temp_dir.'_UNUSED')) {
             rrmdir($temp_dir.'_UNUSED');
         } else {
@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if(!(isset($_GET['resumableIdentifier']) && trim($_GET['resumableIdentifier'])!='')){
         $_GET['resumableIdentifier']='';
     }
-    $temp_dir = 'uploads/'.$_GET['resumableIdentifier'];
+    $temp_dir = 'Presentation/'.$_GET['resumableIdentifier'];
     if(!(isset($_GET['resumableFilename']) && trim($_GET['resumableFilename'])!='')){
         $_GET['resumableFilename']='';
     }
