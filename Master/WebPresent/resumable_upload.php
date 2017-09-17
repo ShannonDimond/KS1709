@@ -1,7 +1,7 @@
 <?php
 /**
  * This is the implementation of the server side part of
- * Resumable.js client script, which sends/uploads files
+ * Resumable.js client script, which sends/Presentation files
  * to a server in several chunks.
  *
  * The script receives the files in a standard way as if
@@ -121,7 +121,7 @@ function createFileFromChunks($temp_dir, $fileName, $chunkSize, $totalSize,$tota
         }
 
         // rename the temporary directory (to avoid access from other 
-        // concurrent chunks uploads) and than delete it
+        // concurrent chunks Presentation) and than delete it
         if (rename($temp_dir, $temp_dir.'_UNUSED')) {
             rrmdir($temp_dir.'_UNUSED');
         } else {
