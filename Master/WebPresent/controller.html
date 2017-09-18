@@ -10,11 +10,11 @@
 <!-- Latest compiled JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <!-- Custom styles for this template -->
-<link href="css/slate.css" rel="stylesheet">
+<link href="slate.min.css" rel="stylesheet">
 <!-- Local JS pages -->
 <script type="text/javascript" src="js/utils.js"></script>
 <script type="text/javascript" src="js/reconnecting-websocket.min.js"></script>
-<script type="text/javascript" src="js/config.js?"></script>
+<script type="text/javascript" src="config.js?"></script>
 
 <!--------------------------------------------------------
 									DEVELOPER NOTES
@@ -307,7 +307,7 @@ function loadSlidePreview()
 	{
 		if (this.readyState == 4 && this.status == 200) 
 		{
-		    //alert("opened file");
+		    alert("opened file");
 			var presentationOrder = JSON.parse(this.responseText);
 			var arrayLength = presentationOrder.length;
 			
@@ -532,17 +532,15 @@ function sendSwap()
 	background-color:#ff8080;;
 	border-radius: 50%;
 	border-color: C0C0C0;
-    }
+}
 </style>
 </head>
 <body onLoad="initialise()">
 <br>
-<div class="container" style="margin-left: 40px">
+<div class="container">
 	<div class="row">
 			<div class="col-md-4">
-			        <a href="controller.html"><input type="button" style="width: 100px" class="btn btn-primary btn-md" value="Controller" /></a>
-					<a href="index.html"><input type="button" style="width: 100px" class="btn btn-primary btn-md" value="Uploader" /></a>
-					<a href="display.html"><input type="button" style="width: 100px" class="btn btn-primary btn-md" value="Display" /></a>
+					<a href="navigation.html"><input type="button" class="btn btn-primary btn-md" value="Back To Navigation" /></a>
 			</div>
 			<div class="col-md-8">
 					<h1>WebPresent Controller</h1>
