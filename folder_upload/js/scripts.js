@@ -7,7 +7,7 @@ var overwrite = []; // save the overwriting permission for folders of files here
 var r = new Resumable({
     target: 'resumable_upload.php',
     query: { upload_token: 'files' },
-    fileType: ['jpeg','jpg','png','webm', 'mp4']
+    fileType: ['jpeg','jpg','png','webm', 'mp4','JPEG','JPG','PNG','WEBM','MP4']
 });
 
 
@@ -26,7 +26,8 @@ function upload(file) {
 
 if (!r.support) {
 
-} else {
+} 
+else {
     // Show a place for dropping/selecting files
     $('.resumable-drop').show();
     r.assignDrop($('.resumable-drop')[0]);
@@ -123,8 +124,7 @@ function syncFolders() {
                 folders = [];
                 for (file in files) {
                     // getting the folder name
-                    // if files[file] = 'media/presentations/slides1/presentations.png
-                    // then 'presentations' will be pushed to "folders"
+                //??
                     folder = files[file].split("/")[0];
                     if (folders.indexOf(folder) == -1) {
                         folders.push(folder);
