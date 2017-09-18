@@ -1,8 +1,8 @@
 <?php
 
 $ds = "/";
-$uploadDir = 'Presentation'.$ds;
-$fileName = 'presentationOrder';
+$uploadDir = 'Presentation';
+$fileName = 'presentationOrder.txt';
 
 if(!file_exists($fileName)) {
     $file = fopen($fileName, "w");
@@ -11,18 +11,18 @@ if(!file_exists($fileName)) {
 
 $method = $_SERVER['REQUEST_METHOD'];
 
-function getDirContents($dir, &$results = array()){
-    $files = scandir($dir);
-
+function getDirContents($dir, &$results = array()) {
+    $files = scandir($dir, SCANDIR_SORT_NONE);
     foreach($files as $key => $value) {
         $path = $dir . "/"   . $value;
         if(!is_dir($path)) {
-            $results[] = $path;
+            $results[] = substr($path,strpos($path,"/")+1);
         } else if($value != "." && $value != "..") {
             getDirContents($path,$results);
         }
     }
 
+    natsort($results);
     return $results;
 }
 
@@ -39,7 +39,7 @@ switch($method) {
     case 'GET':
         $file = fopen($fileName , "r") or die("Unable to open file!");
 
-        $current_dirs = getDirContents("Presentation");
+        $current_dirs = getDirContents($uploadDir);
         $dirs = (array) json_decode(fread($file, filesize($fileName)));
         fclose($file);
         $dirs = array_unique(array_merge($dirs,$current_dirs));
@@ -65,12 +65,14 @@ switch($method) {
         if(isset($_POST['folder_name'])) {
             $folder_name = $_POST['folder_name'];
             if($folder_name)
-                if(is_dir($uploadDir.$folder_name))
-                    delDir($uploadDir.$folder_name);
+                if(is_dir($uploadDir.$ds.$folder_name))
+                    delDir($uploadDir.$ds.$folder_name);
                 else 
-                    unlink($uploadDir.$folder_name);
+                    unlink($uploadDir.$ds.$folder_name);
             
-            $new_config = getDirContents("Presentation");
+            $new_config = array_filter($config,function($var){
+                return strpos($var, $folder_name) == false;
+            });
         }
         // request to reorder the folders
         else if(isset($_POST['folder_order'])) {
@@ -79,7 +81,7 @@ switch($method) {
             // making a new configuration based on the requested folder_order
             foreach($folder_order as $folder_index => $folder_name) {
                 foreach($config as $index => $file_name){
-                    $dir = explode($ds,$file_name)[1];
+                    $dir = explode($ds,$file_name)[0];
                     if($dir == $folder_name){
                         $new_config[] = $file_name;
                     }

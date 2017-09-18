@@ -2,18 +2,22 @@
 
 <meta charset="utf-8">
 
-<title>Dropzone simple example</title>
+<title>Web Presenter</title>
 
 
 <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
 crossorigin="anonymous"></script>
+
 <script src="js/resumable.js"></script>
 
-<link rel="stylesheet" href="css/dropzone.css">
 <link rel="stylesheet" href="css/styles.css">
 
 
 <body>
+<<<<<<< HEAD
+<h1> Webpresent Uploader</h1>
+=======
+>>>>>>> 23bc7358307e231f799e774c6ba1b264d6a01259
     <table>
         <tr>
             <td id="frame">
@@ -21,9 +25,15 @@ crossorigin="anonymous"></script>
                     Your browser, unfortunately, is not supported by Resumable.js. The library requires support for <a href="http://www.w3.org/TR/FileAPI/">the HTML5 File API</a>                    along with <a href="http://www.w3.org/TR/FileAPI/#normalization-of-params">file slicing</a>.
                 </div>
 
+<<<<<<< HEAD
+                <div class="resumable-drop" ondragenter="jQuery(this).addClass('resumable-dragover');" ondragleave="jQuery(this).removeClass('resumable-dragover');"
+                    ondrop="jQuery(this).removeClass('resumable-dragover');">
+                    Drop files/folders here to upload or
+=======
                 <div class="resumable-drop" ondragenter="$(this).addClass('resumable-dragover');" ondragend="$(this).removeClass('resumable-dragover');"
                     ondrop="$(this).removeClass('resumable-dragover');">
                     Drop video files here to upload or
+>>>>>>> 23bc7358307e231f799e774c6ba1b264d6a01259
                     <a class="resumable-browse">
                         <u>select from your computer</u>
                     </a>
@@ -55,6 +65,16 @@ crossorigin="anonymous"></script>
             </td>
         </tr>
     </table>
+    
+    <div id="confirm-box" style="display:none;">
+        <div class="backdrop"></div>
+        <div class="content">
+            <h3 id="message">hello</h3>
+            <br/>
+            <button id="okbtn">Ok</button>
+            <button id="cancelbtn" >Cancel</button>
+        </div>
+    </div>
 </body>
 
 <script src="//cdn.jsdelivr.net/sortable/latest/Sortable.min.js"></script>

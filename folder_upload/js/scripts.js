@@ -34,29 +34,45 @@ if (!r.support) {
     // Handle file add event
     r.on('fileAdded', function (file) {
 
-        // if a folder is dropeed, "fullPath" will be defined
+        // if a folder is dropeed, "relativePath" will be defined
         if(file.relativePath != file.fileName) {
             // striping the actual filename and getting the directory of that file
-            var dir = file.relativePath.substring(0, file.relativePath.lastIndexOf('\/'));
-
+            var dir = file.relativePath.substring(0, file.relativePath.lastIndexOf('/'));
+            console.log(overwrite[dir]);
             if(overwrite[dir] != ALLOWED && fileExists(dir)) {
-                if(overwrite[dir] == undefined && confirm(dir + " already exists,\nOverwrite?")) {
-                    overwrite[dir] = ALLOWED;
-                    deleteFolder(dir);
-                    upload(file);
+                if(overwrite[dir] == undefined) { 
+                    confirmMessage(
+                        dir + " already exists,\nOverwrite?",
+                        function() {
+                            overwrite[dir] = ALLOWED;
+                            deleteFolder(dir);
+                            upload(file);
+                        },
+                        function() {
+                            overwrite[dir] = NOT_ALLOWED;
+                            r.removeFile(file);
+                        }
+                    )
+                    
                 }
                 else {
                     overwrite[dir] = NOT_ALLOWED;
+                    r.removeFile(file);
                 }
             }
-            else 
+            else {
+                overwrite[dir] = ALLOWED;
                 upload(file);
+            }
         }
         // in case of just files
         else {
             if(fileExists(file.fileName)) {
-                if(confirm(file.fileName + " already exists,\nOverwrite?"))
-                    upload(file);
+                confirmMessage(
+                    file.fileName + " already exists,\nOverwrite?",
+                    function(){upload(file)},
+                    function(){r.removeFile(file)}
+                );
             }
             else
                 upload(file);
@@ -87,75 +103,11 @@ if (!r.support) {
     });
 }
 
-// Dropzone.options.uploadArea = {
-//     paramName: "files", // The name that will be used to transfer the file
-//     maxFilesize: 5000, // MB
-//     addRemoveLinks: true, // if true, will hae a remove link in preview
-//     uploadMultiple: true,
-//     parallelUploads: 1000,
-//     // acceptedFiles: "image/*,video/mp4,video/webm", // limiting file types
-//     accept: function(file, done) {
-//         // if a folder is dropeed, "fullPath" will be defined
-//         if(file.fullPath) {
-//             // striping the actual filename and getting the directory of that file
-//             var dir = file.fullPath.substring(0, file.fullPath.lastIndexOf('\/'));
-//             if(overwrite[dir] != ALLOWED && fileExists(dir)) {
-//                 if(overwrite[dir] == undefined ) {
-//                     confirm_dialog (
-//                         dir+" already exists, do you want to overwrite?",
-//                         function() {
-//                             overwrite[dir] = ALLOWED;
-//                             deleteFolder(dir);
-//                             done();
-//                         },
-//                         function() {
-//                             done("folder already exists");
-//                             overwrite[dir] = NOT_ALLOWED;
-//                         }
-//                     )
-//                 }
-//                 else {
-//                     done("folder already exists");
-//                 }
-//             }
-//             else 
-//                 done();
-//         }
-//         // in case of just files
-//         else {
-//             if(fileExists(file.name)) {
-//                 if(confirm(file.name + " already exists,\nOverwrite?"))
-//                     done();
-//                 else 
-//                     done("file already exists");
-//             }
-//             else 
-//                 done();
-//         }
-//     },
-//     init: function() {
-//         this.on("sendingmultiple", function(files, xhr, data) {
-//             var i=0;
-//             for(i in files){
-//                 // in case of folder upload, adding the fullPath s in request
-//                 if(files[i].fullPath) {
-//                     data.append("full_path["+i+"]", files[i].fullPath);
-//                 }
-//                 i++;
-//             }
-//         });
-//         this.on("queuecomplete", function(file) { 
-//             overwrite = [];
-//             syncFolders();
-//         });
-//     }
-// };
 
 function fileExists(url) {
     var http = new XMLHttpRequest();
-    http.open('GET', 'upload.php/?url=' + url, false);
+    http.open('GET', 'checkfile.php/?url=' + url, false);
     http.send();
-    console.log(http.status);
     return http.status != 404;
 }
 
@@ -173,7 +125,7 @@ function syncFolders() {
                     // getting the folder name
                     // if files[file] = 'media/presentations/slides1/presentations.png
                     // then 'presentations' will be pushed to "folders"
-                    folder = files[file].split("\/")[1];
+                    folder = files[file].split("/")[0];
                     if (folders.indexOf(folder) == -1) {
                         folders.push(folder);
                         document.getElementById("folder_list").innerHTML +=
@@ -185,7 +137,7 @@ function syncFolders() {
                 alert('There was an error 400');
             }
             else {
-                alert('something else other than 200 was returned');
+                alert(xmlhttp.status);
             }
         }
     };
@@ -245,12 +197,16 @@ var folder_list = document.getElementById("folder_list");
 var editableList = Sortable.create(folder_list, {
     filter: '.js-remove',
     onFilter: function (evt) {
-        if (confirm("Sure to delete?")) {
-            var el = editableList.closest(evt.item); // get dragged item
-            el && el.parentNode.removeChild(el);
-            deleteFolder(evt.item.innerText.slice(0, -1));
-            window.location.reload(true);
-        }
+        confirmMessage(
+            "Sure to delete?",
+            function() {
+                var el = editableList.closest(evt.item); // get dragged item
+                el && el.parentNode.removeChild(el);
+                deleteFolder(evt.item.innerText.slice(0, -1));
+                syncFolders();
+            },
+            function(){}
+        )
     },
     onEnd: function (evt) {
         evt.oldIndex;  // element's old index within parent
@@ -265,4 +221,12 @@ var editableList = Sortable.create(folder_list, {
 
 window.onload = function () {
     syncFolders();
+}
+
+
+function confirmMessage(message, onAccept, onCancel) {
+    $("#confirm-box").css("display" ,"inherit");
+    document.getElementById("message").innerText = message;
+    document.getElementById("okbtn").onclick = function(){onAccept();$("#confirm-box").css("display" ,"none");}
+    document.getElementById("cancelbtn").onclick = function(){onCancel();$("#confirm-box").css("display" ,"none");}
 }
