@@ -3272,6 +3272,7 @@ fieldset[disabled] .btn-success.focus {
 }*/
 .btn-info:active,
 .btn-info.active,
+
 .open > .dropdown-toggle.btn-info {
   background-image: none;
 }
@@ -7277,4 +7278,11 @@ a.list-group-item-danger.active:focus {
 .panel-warning .panel-heading,
 .panel-info .panel-heading {
   border-color: #000;
+}
+.circle {
+    width: 25px;
+	height: 25px;
+	background-color:#ff8080;;
+	border-radius: 50%;
+	border-color: C0C0C0;
 }
