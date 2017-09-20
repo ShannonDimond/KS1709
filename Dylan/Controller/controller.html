@@ -22,25 +22,28 @@
 More comments are needed throughout this document.
 Need to standardise the code formatting.
 Currently implementing video controls.
+System only accepts video's and images. Web pages are for 
+setting display to black.
 --------------------------------------------------------->
 
 <script type="text/javascript">
 /*--------------------------------------------------------
 										Variable Decliration
 --------------------------------------------------------*/
-var currentSlideName = "";						//Tracks the name of the current file
-var currentSlideType = "";						//Tracks the type of the current file
-var nextSlideName = "";								//Tracks the name of the next file
-var nextSlideType = "";								//Tracks the type of the next file
-var filePath = "Presentation/";				//The path to the root folder where media items are kept
-var playVideo = "Play";								//Standard command to Play a video
-var pauseVideo = "Pause";							//Standard command to Pause a video
-var muteVideo = "Mute";								//Standard command to Mute a video
-var unmuteVideo = "Unmute";						//Standard command to Unmute a video
-var startPage = "display.html"				//The display client page, used as the first slide
-var endPage = "black.html"						//Black HTML page used to set the screens to black
-//var videoFileTypes[];									//An array to track all the avaliable video types
-//var imageFileTypes[];									//An array to track all the avaliable image types
+var currentSlideName = "";								//Tracks the name of the current file
+var currentSlideType = "";								//Tracks the type of the current file
+var nextSlideName = "";										//Tracks the name of the next file
+var nextSlideType = "";										//Tracks the type of the next file
+var mediaFilePath = "Presentation/";			//The path to the root folder where media items are kept
+var webFilePath = "";											//The path to the root folder where webpages are kept
+var playVideo = "Play";										//Standard command to Play a video
+var pauseVideo = "Pause";									//Standard command to Pause a video
+var muteVideo = "Mute";										//Standard command to Mute a video
+var unmuteVideo = "Unmute";								//Standard command to Unmute a video
+var endPage = "black.html"								//Black HTML page used to set the screens to black
+var webpageFiletypes = ["htm", "html"];						//An array to track all the avaliable webpage types
+var videoFiletypes = ["mp4", "webm"];							//An array to track all the avaliable video types
+var imageFiletypes= ["jpg", "png", "gif", "bmp"];	//An array to track all the avaliable image types
 
 
 /*--------------------------------------------------------
@@ -55,21 +58,13 @@ function startPresentation()
 {
 	var index = 0;
 
-	//Assign the currentSlideImage to the startPage and send/swap
+	//Assign the currentSlideImage to the endPage and send/swap
 	nextSlideName = endPage;
 	nextSlideType = "html";
-	sendURL(nextSlideName);
-	sendSwap();
-	
-	//Display initial startPage preview images
-	$("#currentSlideHTML").attr('src', nextSlideName);
-	$("#currentSlideHTML").show();
-	$("#currentSlideImage").hide();
-	$("#currentSlideVideo").hide();
-	
-	//Assign the next slide to current
 	currentSlideName = nextSlideName;
 	currentSlideType = nextSlideType;
+	
+	displayWebPreview("current", webFilePath, currentSlideName);
 	
 	//Assign the first element of the slide deck to next variable
 	$('#order').children('input').each(function() 
@@ -83,22 +78,26 @@ function startPresentation()
 		}
 	});
 	
-	//Hide elements based upon fileType, then buffer the slide in the hidden iFrame and dont swap
-	if (nextSlideType == "mp4" | nextSlideType == "webm")
+	if (validateFiletype(videoFiletypes, nextSlideType))
 	{
-		$("#previewSlideImage").hide();
-		$("#previewSlideVideo").show();
-		$("#previewSlideVideo").attr('src', filePath + nextSlideName);
+		displayVideoPreview("next", mediaFilePath, nextSlideName);
 		setTimeout(sendVideo, 100);
 		//DEVELOPER NOTES: MAY NEED A VIDEOPAUSE HERE. NEEDS TESTING.
 	}
+	else if (validateFiletype(webpageFiletypes, nextSlideType))
+	{
+		displayWebPreview("next", webFilePath, nextSlideName);
+		setTimeout(sendURL, 100);
+	}
+	else if (validateFiletype(imageFiletypes, nextSlideType))
+	{
+		displayImagePreview("next", mediaFilePath, nextSlideName);
+		setTimeout(sendImage, 100);
+	}
 	else 
 	{
-		$("#previewSlideImage").show();
-		$("#previewSlideVideo").hide();
-		$("#previewSlideImage").attr('src', filePath + nextSlideName);
-		sendImage();
-	}	
+		alert("File Type Error: " + nextSlideName + "has a filetype of " + nextSlideType + ", which isn't a valid filetype");
+	}
 }
 
 /*--------------------------------------------------------
@@ -119,7 +118,7 @@ $(document).ready(function()
 		$("#loadSlide").attr("disabled", true);
 		$("#loadSlide").val("Loading...");
 	
-		if (currentSlideType == 'mp4' || currentSlideType == 'webm')
+		if (validateFiletype(videoFiletypes, currentSlideType))
 		{
 			sendVideoControl(pauseVideo);
 		}
@@ -156,70 +155,59 @@ $(document).ready(function()
 			nextSlideName = presentationOrder[presentationOrder.length-1].id;
 			nextSlideType = presentationOrder[presentationOrder.length-1].id.substr(presentationOrder[presentationOrder.length-1].id.lastIndexOf('.') + 1);	
 		}
-		
-		//Set the current slide preview picture
-		if (currentSlideType == "mp4" | currentSlideType == "webm")
+
+		//Set the current slide preview window
+		if (validateFiletype(videoFiletypes, currentSlideType))
 		{
-			$("#currentSlideVideo").attr('src', filePath + currentSlideName);
-			$("#currentSlideHTML").hide();
-			$("#currentSlideImage").hide();
-			$("#currentSlideVideo").show();
-			
-			//DEVELOPER NOTES: NEEDS TO BE CHECKED
-			sendVideoControl(playVideo);
-			sendVideoControl(unmuteVideo);
+				displayVideoPreview("current", mediaFilePath, currentSlideName);
+				//DEVELOPER NOTES: NEEDS TO BE CHECKED
+				sendVideoControl(playVideo);
+				sendVideoControl(unmuteVideo);
 		}
-		else if (currentSlideType == "html")
+		else if (validateFiletype(webpageFiletypes, currentSlideType))
 		{
-			$("#currentSlideHTML").attr('src', currentSlideName);
-			$("#currentSlideHTML").show();
-			$("#currentSlideImage").hide();
-			$("#currentSlideVideo").hide();
+			displayWebPreview("current", webFilePath, currentSlideName);
 		}
-		else
+		else if (validateFiletype(imageFiletypes, currentSlideType))
 		{
-			$("#currentSlideImage").attr('src', filePath + currentSlideName);
-			$("#currentSlideHTML").hide();
-			$("#currentSlideImage").show();
-			$("#currentSlideVideo").hide();
+			displayImagePreview("current", mediaFilePath, currentSlideName);
+		}
+		else 
+		{
+			alert("File Type Error: " + currentSlideName + "has a filetype of " + currentSlideType + ", which isn't a valid filetype");
 		}
 		
-		//Set the next slide preview picture & buffer slide
-		if (nextSlideType == "mp4" | nextSlideType == "webm")
+		//Set the next slide preview window & buffer slide
+		if (validateFiletype(videoFiletypes, nextSlideType))
 		{
-			$("#previewSlideVideo").attr('src', filePath + nextSlideName);
-			$("#previewSlideHTML").hide();
-			$("#previewSlideImage").hide();
-			$("#previewSlideVideo").show();
+			displayVideoPreview("next", mediaFilePath, nextSlideName);
 			setTimeout(sendVideo, 1000);
 		}
-		else if (nextSlideType == "html")
+		else if (validateFiletype(webpageFiletypes, nextSlideType))
 		{
-			$("#previewSlideHTML").attr('src', nextSlideName);
-			$("#previewSlideHTML").show();
-			$("#previewSlideImage").hide();
-			$("#previewSlideVideo").hide();
+			displayWebPreview("next", webFilePath, nextSlideName);
 			setTimeout(sendURL, 1000);
+		}	
+		else if (validateFiletype(imageFiletypes, nextSlideType))
+		{
+			displayImagePreview("next", mediaFilePath, nextSlideName);
+			setTimeout(sendImage, 1000);
 		}	
 		else 
 		{
-			$("#previewSlideImage").attr('src', filePath + nextSlideName);
-			$("#previewSlideHTML").hide();
-			$("#previewSlideImage").show();
-			$("#previewSlideVideo").hide();
-			setTimeout(sendImage, 1000);
-		}	
+			alert("File Type Error: " + nextSlideName + "has a filetype of " + nextSlideType + ", which isn't a valid filetype");
+		}
 			
 		//Highlight the current slide in the slide deck
 		$('#order').children('input').each(function() 
 		{
 			if (currentSlideName == this.id)
 			{				
-				//$(this).css("color", "#f7f325");
+				$(this).css("color", "#f7f325");
 			}
 			else
 			{
-				//$(this).css("color", "white");
+				$(this).css("color", "white");
 			}
 		});
 		
@@ -256,6 +244,8 @@ and then buffers it in the hidden iFrame.
 --------------------------------------------------------*/
 function previewSlide(clicked_id) 
 {
+	var index = 0;
+	
 	//Set the current to the next fields
 	nextSlideName = currentSlideName;
 	nextSlideType = currentSlideType;
@@ -263,6 +253,7 @@ function previewSlide(clicked_id)
 	//Loop through each element in the slide deck & assign variables
 	$('#order').children('input').each(function() 
 	{
+		index++;
     if (clicked_id == this.id)
 		{
 			nextSlideName = this.id;
@@ -276,30 +267,25 @@ function previewSlide(clicked_id)
 	});
 	
 	//Set the next slide preview picture & buffer slide
-	if (nextSlideType == "mp4" | nextSlideType == "webm")
+	if (validateFiletype(videoFiletypes, nextSlideType))
 	{
-		$("#previewSlideVideo").attr('src', filePath + nextSlideName);
-		$("#previewSlideHTML").hide();
-		$("#previewSlideImage").hide();
-		$("#previewSlideVideo").show();
+		displayVideoPreview("next", mediaFilePath, nextSlideName);
 		setTimeout(sendVideo, 1000);
 	}
-	else if (nextSlideType == "html")
+	else if (validateFiletype(webpageFiletypes, nextSlideType))
 	{
-		$("#previewSlideHTML").attr('src', nextSlideName);
-		$("#previewSlideHTML").show();
-		$("#previewSlideImage").hide();
-		$("#previewSlideVideo").hide();
+		displayWebPreview("next", webFilePath, nextSlideName);
 		setTimeout(sendURL, 1000);
+	}	
+	else if (validateFiletype(imageFiletypes, nextSlideType))
+	{
+		displayImagePreview("next", mediaFilePath, nextSlideName);
+		setTimeout(sendImage, 1000);
 	}	
 	else 
 	{
-		$("#previewSlideImage").attr('src', filePath + nextSlideName);
-		$("#previewSlideHTML").hide();
-		$("#previewSlideImage").show();
-		$("#previewSlideVideo").hide();
-		setTimeout(sendImage, 1000);
-	}	
+		alert("File Type Error: " + nextSlideName + "has a filetype of " + nextSlideType + ", which isn't a valid filetype");
+	}
 }
 
 /*--------------------------------------------------------
@@ -380,7 +366,7 @@ function initialise()
   }
 	
 	//Set loading images
-	$("#currentSlideImage").attr('src', filePath + "start.jpg");
+	$("#currentSlideImage").attr('src', mediaFilePath + "start.jpg");
 	  
 	//Hide preview frames
 	$("#currentSlideHTML").hide();
@@ -397,7 +383,64 @@ function initialise()
 	loadSlidePreview();
 	
 	//Load up the initial slides
-	setTimeout(startPresentation, 100);
+	setTimeout(startPresentation, 300);
+}
+
+/*--------------------------------------------------------
+										Validate Filetype
+----------------------------------------------------------
+COMMENTS
+--------------------------------------------------------*/
+function validateFiletype(filetypeArray, filetype) 
+{
+	for (var index = 0; index < filetypeArray.length; index++)
+	{
+		if (filetype == filetypeArray[index])
+		{
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+/*--------------------------------------------------------
+										Display Image Preview
+----------------------------------------------------------
+COMMENTS
+--------------------------------------------------------*/
+function displayImagePreview(previewWindowName, filePath, filename) 
+{
+	$("#" + previewWindowName + "SlideImage").attr('src', filePath + filename);
+	$("#" + previewWindowName + "SlideImage").show();
+	$("#" + previewWindowName + "SlideWebpage").hide();
+	$("#" + previewWindowName + "SlideVideo").hide();
+}
+
+/*--------------------------------------------------------
+										Display Web Preview
+----------------------------------------------------------
+COMMENTS
+--------------------------------------------------------*/
+function displayWebPreview(previewWindowName, filePath, filename) 
+{
+	$("#" + previewWindowName + "SlideWebpage").attr('src', filePath + filename);
+	$("#" + previewWindowName + "SlideWebpage").show();
+	$("#" + previewWindowName + "SlideImage").hide();
+	$("#" + previewWindowName + "SlideVideo").hide();
+}
+
+/*--------------------------------------------------------
+									 Display Video Preview
+----------------------------------------------------------
+COMMENTS
+--------------------------------------------------------*/
+function displayVideoPreview(previewWindowName, filePath, filename) 
+{
+	$("#" + previewWindowName + "SlideVideo").attr('src', filePath + filename);
+	$("#" + previewWindowName + "SlideVideo").show();
+	$("#" + previewWindowName + "SlideImage").hide();
+	$("#" + previewWindowName + "SlideWebpage").hide();
 }
 
 /*--------------------------------------------------------
@@ -410,7 +453,7 @@ to it as well as the filename.
 --------------------------------------------------------*/
 function sendURL() 
 {
-	socketSend('U' + nextSlideName);
+	socketSend('U' + webFilePath + nextSlideName);
 }
 
 /*--------------------------------------------------------
@@ -418,9 +461,9 @@ function sendURL()
 ----------------------------------------------------------
 FILL IN
 --------------------------------------------------------*/
-function sendHTML(html) 
+function sendHTML() 
 {
-	socketSend('H' + filePath + nextSlideName);
+	socketSend('H' + html);
 }
 
 /*--------------------------------------------------------
@@ -433,7 +476,7 @@ as well as the filename.
 --------------------------------------------------------*/
 function sendImage() 
 {
-	socketSend('I' +  filePath + nextSlideName);
+	socketSend('I' +  mediaFilePath + nextSlideName);
 }
 
 /*--------------------------------------------------------
@@ -446,7 +489,7 @@ as well as the filename.
 --------------------------------------------------------*/
 function sendVideo() 
 {
-	socketSend('V' + filePath + nextSlideName);
+	socketSend('V' + mediaFilePath + nextSlideName);
 }
 
 /*--------------------------------------------------------
@@ -567,9 +610,9 @@ function sendSwap()
 		</div>
 		<div class="col-md-5">
 			<h3 align="center">Current Slide</h3>
-			<iframe id="currentSlideHTML" src="" height="300" width="450"></iframe>
-			<image id="currentSlideImage" src="" height="300" width="450" allowtransparency="true"></image>
-			<video id='currentSlideVideo' autoplay="autoplay" loop preload="metadata" height="300" width="450" muted controls><source src="" type="video/mp4"></video>
+			<iframe id="currentSlideWebpage" src="" height="300" width="450" hidden></iframe>
+			<image id="currentSlideImage" src="" height="300" width="450" allowtransparency="true" hidden></image>
+			<video id='currentSlideVideo' autoplay="autoplay" loop preload="metadata" height="300" width="450" muted controls hidden><source src="" type="video/mp4"></video>
 			</br></br>
 			<input type="button" style="width: 140px" class="btn btn-primary btn-md" id="loadSlide" value="Load Next Slide" />
 			<input type="button" style="width: 140px" class="btn btn-primary btn-md" id="Swap" value="Send Swap (Test)" onclick="sendSwap(0);" />
@@ -579,9 +622,9 @@ function sendSwap()
 		</div>
 		<div class="col-md-5">
 			<h3 align="center">Next Slide</h3>
-			<iframe id="previewSlideHTML" src="" height="300" width="450"></iframe>
-			<image id="previewSlideImage" src="" height="300" width="450" allowtransparency="true"></image>
-			<video id='previewSlideVideo' loop preload="metadata" height="300" width="450" muted controls><source src="" type="video/mp4"></video>
+			<iframe id="nextSlideWebpage" src="" height="300" width="450" hidden></iframe>
+			<image id="nextSlideImage" src="" height="300" width="450" allowtransparency="true" hidden></image>
+			<video id='nextSlideVideo' loop preload="metadata" height="300" width="450" muted controls hidden><source src="" type="video/mp4"></video>
 			<br/><br/>
 			<br/><br/>
 			</br></br>
