@@ -19,14 +19,14 @@
  * @email meetbivek@gmail.com
  */
 
- $upload_dir = 'Presentation/';
+ $upload_dir = $_SERVER['DOCUMENT_ROOT'].'/folder_upload1/Presentation/';
 
 
 ////////////////////////////////////////////////////////////////////
 // THE FUNCTIONS
 ////////////////////////////////////////////////////////////////////
 
-function getDirContents($dir, &$results = array()){
+function getDirContents($dir, &$results = array()) {
     $files = scandir($dir);
 
     foreach($files as $key => $value) {
@@ -168,7 +168,7 @@ if (!empty($_FILES)) foreach ($_FILES as $file) {
 
     // init the destination file (format <filename.ext>.part<#chunk>
     // the file is stored in a temporary directory
-    $temp_dir = 'temp';
+    $temp_dir = 'Presentation/temp';
     if(isset($_POST['resumableRelativePath']) && trim($_POST['resumableRelativePath'])!=''){
         $dest_file = $temp_dir.'/'.$_POST['resumableRelativePath'].'.part'.$_POST['resumableChunkNumber'];
     }
