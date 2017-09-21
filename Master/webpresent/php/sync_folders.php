@@ -1,22 +1,25 @@
 <?php
 
 $ds = "/";
-$uploadDir = 'Presentation';
-$fileName = 'presentationOrder.txt';
+$uploadDir = $_SERVER['DOCUMENT_ROOT'].'/webpresent/Presentation';
+$fileName = $_SERVER['DOCUMENT_ROOT'].'/webpresent/presentationOrder.txt';
 
 if(!file_exists($fileName)) {
     $file = fopen($fileName, "w");
+    chmod($file, 0777);
     fclose($file);
 }
 
 $method = $_SERVER['REQUEST_METHOD'];
 
 function getDirContents($dir, &$results = array()) {
+
+    $len = strlen($_SERVER['DOCUMENT_ROOT'].'/webpresent/Presentation');
     $files = scandir($dir, SCANDIR_SORT_NONE);
     foreach($files as $key => $value) {
         $path = $dir . "/"   . $value;
         if(!is_dir($path)) {
-            $results[] = substr($path,strpos($path,"/")+1);
+            $results[] = substr($path, $len+1);
         } else if($value != "." && $value != "..") {
             getDirContents($path,$results);
         }
@@ -26,13 +29,6 @@ function getDirContents($dir, &$results = array()) {
     return $results;
 }
 
-function delDir($dir) { 
-    $files = array_diff(scandir($dir), array('.','..')); 
-    foreach ($files as $file) { 
-        (is_dir("$dir/$file")) ? delDir("$dir/$file") : unlink("$dir/$file"); 
-    } 
-    return rmdir($dir); 
-} 
 
 switch($method) {
     // request to update the folder_config and return
@@ -55,27 +51,15 @@ switch($method) {
         fclose($file);
         echo $config;
         break;
+        
     case 'POST':
         $file = fopen($fileName , "r") or die("Unable to open file!");
         $config = (array) json_decode(fread($file, filesize($fileName)));
         fclose($file);
         $new_config = array();
 
-        // request to delete a folder
-        if(isset($_POST['folder_name'])) {
-            $folder_name = $_POST['folder_name'];
-            if($folder_name)
-                if(is_dir($uploadDir.$ds.$folder_name))
-                    delDir($uploadDir.$ds.$folder_name);
-                else 
-                    unlink($uploadDir.$ds.$folder_name);
-            
-            $new_config = array_filter($config,function($var){
-                return strpos($var, $folder_name) == false;
-            });
-        }
         // request to reorder the folders
-        else if(isset($_POST['folder_order'])) {
+        if(isset($_POST['folder_order'])) {
             $folder_order = explode("\r\n", $_POST['folder_order']);
 
             // making a new configuration based on the requested folder_order
@@ -88,6 +72,7 @@ switch($method) {
                 }
             }
         }
+
         $config = json_encode($new_config, JSON_PRETTY_PRINT);
         $config = str_replace("\/", "/", $config);
         $file = fopen($fileName , "w") or die("Unable to open file!");        

@@ -19,14 +19,14 @@
  * @email meetbivek@gmail.com
  */
 
- $upload_dir = 'Presentation/';
+ $upload_dir = $_SERVER['DOCUMENT_ROOT'].'/webpresent/Presentation/';
 
 
 ////////////////////////////////////////////////////////////////////
 // THE FUNCTIONS
 ////////////////////////////////////////////////////////////////////
 
-function getDirContents($dir, &$results = array()){
+function getDirContents($dir, &$results = array()) {
     $files = scandir($dir);
 
     foreach($files as $key => $value) {
@@ -54,7 +54,7 @@ function _log($str) {
     echo $log_str;
 
     // log to file
-    if (($fp = fopen('upload_log.txt', 'a+')) !== false) {
+    if (($fp = fopen('../upload_log.txt', 'a+')) !== false) {
         fputs($fp, $log_str);
         fclose($fp);
     }
@@ -106,10 +106,10 @@ function createFileFromChunks($temp_dir, $fileName, $chunkSize, $totalSize,$tota
     // If the Size of all the chunks on the server is equal to the size of the file uploaded.
     if ($total_files_on_server_size >= $totalSize) {
     // create the final destination file ]
-        if (!is_dir(dirname("Presentation/".$fileName))) {
-            mkdir(dirname("Presentation/".$fileName), 0777, true);
+        if (!is_dir(dirname("../Presentation/".$fileName))) {
+            mkdir(dirname("../Presentation/".$fileName), 0777, true);
         }
-        if (($fp = fopen("Presentation/".$fileName, 'w')) !== false) {
+        if (($fp = fopen("../Presentation/".$fileName, 'w')) !== false) {
             for ($i=1; $i<=$total_files; $i++) {
                 fwrite($fp, file_get_contents($temp_dir.'/'.$fileName.'.part'.$i));
                 _log('writing chunk '.$i);
@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if(!(isset($_GET['resumableIdentifier']) && trim($_GET['resumableIdentifier'])!='')){
         $_GET['resumableIdentifier']='';
     }
-    $temp_dir = 'Presentation/'.$_GET['resumableIdentifier'];
+    $temp_dir = '../Presentation/'.$_GET['resumableIdentifier'];
     if(!(isset($_GET['resumableFilename']) && trim($_GET['resumableFilename'])!='')){
         $_GET['resumableFilename']='';
     }
@@ -168,7 +168,7 @@ if (!empty($_FILES)) foreach ($_FILES as $file) {
 
     // init the destination file (format <filename.ext>.part<#chunk>
     // the file is stored in a temporary directory
-    $temp_dir = 'temp';
+    $temp_dir = '../Presentation/temp';
     if(isset($_POST['resumableRelativePath']) && trim($_POST['resumableRelativePath'])!=''){
         $dest_file = $temp_dir.'/'.$_POST['resumableRelativePath'].'.part'.$_POST['resumableChunkNumber'];
     }
