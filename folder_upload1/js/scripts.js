@@ -7,27 +7,20 @@ var overwrite = []; // save the overwriting permission for folders of files here
 var r = new Resumable({
     target: 'resumable_upload.php',
     query: { upload_token: 'files' },
-    fileType: ['jpeg','jpg','png','webm', 'mp4','JPEG','JPG','PNG','WEBM','MP4']
+    fileType: ['jpeg','jpg','png','webm', 'mp4','JPEG','JPG','MP4','WEBM']
 });
 
 
-function upload(file) {
-    // Show progress pabr
-    $('.resumable-progress, .resumable-list').show();
-    // Show pause, hide resume
+function upload(file) {    
+    // Actually start the upload
     $('.resumable-progress .progress-resume-link').hide();
     $('.resumable-progress .progress-pause-link').show();
-    // Add the file to the list
-    $('.resumable-list').append('<li class="resumable-file-' + file.uniqueIdentifier + '">Uploading <span class="resumable-file-name"></span> <span class="resumable-file-progress"></span>');
-    $('.resumable-file-' + file.uniqueIdentifier + ' .resumable-file-name').html(file.fileName);
-    // Actually start the upload
     r.upload();
 }
 
 if (!r.support) {
 
-} 
-else {
+} else {
     // Show a place for dropping/selecting files
     $('.resumable-drop').show();
     r.assignDrop($('.resumable-drop')[0]);
@@ -35,13 +28,20 @@ else {
     // Handle file add event
     r.on('fileAdded', function (file) {
 
+        // Show progress pabr
+        $('.resumable-progress, .resumable-list').show();
+        // Show pause, hide resume
+        // Add the file to the list
+        $('.resumable-list').append('<li class="resumable-file-' + file.uniqueIdentifier + '">Uploading <span class="resumable-file-name"></span> <span class="resumable-file-progress"></span>');
+        $('.resumable-file-' + file.uniqueIdentifier + ' .resumable-file-name').html(file.fileName);
+        
         // if a folder is dropeed, "relativePath" will be defined
         if(file.relativePath != file.fileName) {
             // striping the actual filename and getting the directory of that file
             var dir = file.relativePath.substring(0, file.relativePath.lastIndexOf('/'));
             console.log(overwrite[dir]);
             if(overwrite[dir] != ALLOWED && fileExists(dir)) {
-                if(overwrite[dir] == undefined) { 
+                if(overwrite[dir] == undefined) {
                     confirmMessage(
                         dir + " already exists,\nOverwrite?",
                         function() {
@@ -88,6 +88,7 @@ else {
         // Hide pause/resume when the upload has completed
         $('.resumable-progress .progress-resume-link, .resumable-progress .progress-pause-link').hide();
         syncFolders();
+        overwrite = [];
     });
     r.on('fileSuccess', function (file, message) {
         // Reflect that the file upload has completed
@@ -124,7 +125,8 @@ function syncFolders() {
                 folders = [];
                 for (file in files) {
                     // getting the folder name
-                //??
+                    // if files[file] = 'media/presentations/slides1/presentations.png
+                    // then 'presentations' will be pushed to "folders"
                     folder = files[file].split("/")[0];
                     if (folders.indexOf(folder) == -1) {
                         folders.push(folder);
@@ -154,7 +156,7 @@ function deleteFolder(folder_name) {
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == XMLHttpRequest.DONE) {
             if (xmlhttp.status == 200) {
-
+                syncFolders();
             }
             else if (xmlhttp.status == 400) {
                 alert('There was an error 400');
@@ -165,7 +167,7 @@ function deleteFolder(folder_name) {
         }
     };
 
-    xmlhttp.open("POST", "sync_folders.php", true);
+    xmlhttp.open("POST", "delete_folder.php", true);
     xmlhttp.send(formData);
 }
 
@@ -203,7 +205,6 @@ var editableList = Sortable.create(folder_list, {
                 var el = editableList.closest(evt.item); // get dragged item
                 el && el.parentNode.removeChild(el);
                 deleteFolder(evt.item.innerText.slice(0, -1));
-                syncFolders();
             },
             function(){}
         )
