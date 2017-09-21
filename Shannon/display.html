@@ -15,9 +15,9 @@ var id = 0;
 function initialise() 
 {
   connectToRelay();
-
+	
   document.getElementById( hidFrame ).innerHTML = '<div align=center><H3 style="font-size:40px;color:#555;">goo.scem.ws</h3><hr style="height:10px;background-color:#fff"><br><br><br><pre style="font-size:30px;color:white;">screenId:</pre><H1 style="font-size:300px;color:white;line-height:0%;top:-70px;position:relative;">' + id + '.0</h1><hr><pre style="font-size:28px;color:white;">' + printConfig() + '</pre></div><hr style="height:10px; background-color:#fff"></br><img src="media/wonderama.png" width=340 style="position:absolute;left:740;top:550">';
-  handleSwap();
+	handleSwap();
 }
 
 function handleMesg( data ) 
@@ -109,10 +109,12 @@ function handleTransitionMode(transitionType)
 	transitionMode = transitionType;
 }
 
-function handleURL( url ) {
+function handleURL(url) 
+{
 	hidFrame = 'iframe' + getNextFrameId( visFrame );
 	console.log("url "+ url + " into " + hidFrame );
-	document.getElementById( hidFrame ).src = url;
+	document.getElementById( hidFrame ).src = url
+	;
 }
 
 function getNextFrameId ( frame ) 
@@ -122,13 +124,11 @@ function getNextFrameId ( frame )
 	return num;
 }
 
-function handleHTML( html ) 
+function handleHTML(html) 
 {
-	hidFrame = 'frame' + getNextFrameId( visFrame );
-	console.log("html "+ html + " into " + hidFrame );
-	//setTimeout(function(){
-		document.getElementById( hidFrame ).innerHTML = html;
-	//}, 10);
+	hidFrame = 'frame' + getNextFrameId(visFrame);
+	console.log("html "+ html + " into " + hidFrame);
+	document.getElementById(hidFrame).innerHTML = html;
 }
 
 function handleImage( image ) 

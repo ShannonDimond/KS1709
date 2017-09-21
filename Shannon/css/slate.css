@@ -3024,6 +3024,7 @@ select[multiple].input-lg {
   -ms-user-select: none;
   user-select: none;
 }
+/*
 .btn:focus,
 .btn:active:focus,
 .btn.active:focus,
@@ -3033,6 +3034,7 @@ select[multiple].input-lg {
   outline: 5px auto -webkit-focus-ring-color;
   outline-offset: -2px;
 }
+*/
 /*.btn:hover,
 .btn:focus,
 .btn.focus {
@@ -3121,12 +3123,14 @@ fieldset[disabled] .btn-default.focus {
   background-color: #7a8288;
   border-color: #7a8288;
 }
+/*
 .btn-primary:focus,
 .btn-primary.focus {
   color: #ffffff;
   background-color: #62686d;
   border-color: #3e4245;
 }
+*/
 /*.btn-primary:hover {
   color: #ffffff;
   background-color: #62686d;
@@ -3268,6 +3272,8 @@ fieldset[disabled] .btn-success.focus {
 }*/
 .btn-info:active,
 .btn-info.active,
+
+
 .open > .dropdown-toggle.btn-info {
   background-image: none;
 }
@@ -6861,7 +6867,7 @@ button.close {
   -webkit-filter: none;
           filter: none;
 }
-/*.btn-primary:hover {
+.btn-primary-hovered  {
   background-image: -webkit-linear-gradient(#404448, #4e5458 40%, #53595d);
   background-image: -o-linear-gradient(#404448, #4e5458 40%, #53595d);
   background-image: -webkit-gradient(linear, left top, left bottom, from(#404448), color-stop(40%, #4e5458), to(#53595d));
@@ -6870,7 +6876,7 @@ button.close {
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff404448', endColorstr='#ff53595d', GradientType=0);
   -webkit-filter: none;
           filter: none;
-}*/
+}
 .btn-success {
   background-image: -webkit-linear-gradient(#78cc78, #62c462 60%, #53be53);
   background-image: -o-linear-gradient(#78cc78, #62c462 60%, #53be53);
@@ -7273,4 +7279,29 @@ a.list-group-item-danger.active:focus {
 .panel-warning .panel-heading,
 .panel-info .panel-heading {
   border-color: #000;
+}
+.circle {
+    width: 25px;
+	height: 25px;
+	background-color:#ff8080;;
+	border-radius: 50%;
+	border-color: C0C0C0;
+}
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    font-size: 110%;
+}
+li a {
+    display: block;
+    width: 75px;
+    background-color: transparent;
+}
+li a.active {
+    background-color: #696969;
+}
+li a:hover {
+    color: white;
+    text-decoration: none;
 }
