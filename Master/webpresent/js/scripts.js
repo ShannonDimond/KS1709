@@ -7,7 +7,7 @@ var overwrite = []; // save the overwriting permission for folders of files here
 var r = new Resumable({
     target: '../php/resumable_upload.php',
     query: { upload_token: 'files' },
-    fileType: ['jpeg','jpg','png','webm', 'mp4']
+    fileType: ['jpeg','jpg','png','webm', 'mp4','JPEG','JPG','PNG','WEBM','MP4']
 });
 
 
