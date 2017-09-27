@@ -33,13 +33,15 @@ if (!r.support) {
         // Show pause, hide resume
         // Add the file to the list
         $('.resumable-list').append('<li class="resumable-file-' + file.uniqueIdentifier + '">Uploading <span class="resumable-file-name"></span> <span class="resumable-file-progress"></span>');
-        $('.resumable-file-' + file.uniqueIdentifier + ' .resumable-file-name').html(file.fileName);
+        $('.resumable-file-' + file.uniqueIdentifier + ' .resumable-file-name').html(file.relativePath);
         
-        // if a folder is dropeed, "relativePath" will be defined
+        // if a folder is dropeed, "relativePath" will be different than "fileName"
         if(file.relativePath != file.fileName) {
             // striping the actual filename and getting the directory of that file
             var dir = file.relativePath.substring(0, file.relativePath.lastIndexOf('/'));
-            console.log(overwrite[dir]);
+
+            // it checks if the file/forlder is already existing or have given permission to
+            // be overwriten and act accordingly
             if(overwrite[dir] != ALLOWED && fileExists(dir)) {
                 if(overwrite[dir] == undefined) {
                     confirmMessage(
@@ -89,6 +91,11 @@ if (!r.support) {
         $('.resumable-progress .progress-resume-link, .resumable-progress .progress-pause-link').hide();
         syncFolders();
         overwrite = [];
+        r = new Resumable({
+            target: '../php/resumable_upload.php',
+            query: { upload_token: 'files' },
+            fileType: ['jpeg','jpg','png','webm', 'mp4']
+        });
     });
     r.on('fileSuccess', function (file, message) {
         // Reflect that the file upload has completed
@@ -119,7 +126,6 @@ function syncFolders() {
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == XMLHttpRequest.DONE) {
             if (xmlhttp.status == 200) {
-                console.log(xmlhttp.responseText);
                 files = JSON.parse(xmlhttp.responseText);
                 document.getElementById("folder_list").innerHTML = "";
                 folders = [];
@@ -135,11 +141,8 @@ function syncFolders() {
                     }
                 }
             }
-            else if (xmlhttp.status == 400) {
-                alert('There was an error 400');
-            }
             else {
-                alert(xmlhttp.status);
+                alert(xmlhttp.statusText);
             }
         }
     };
@@ -148,8 +151,9 @@ function syncFolders() {
     xmlhttp.send();
 }
 
+// get the folder/file name as input and send a request to delete this folder/file
+// via POST request to delete_folder.php
 function deleteFolder(folder_name) {
-    console.log("deleting " + folder_name);
     var xmlhttp = new XMLHttpRequest();
     var formData = new FormData();
     formData.append("folder_name", folder_name);
@@ -158,11 +162,8 @@ function deleteFolder(folder_name) {
             if (xmlhttp.status == 200) {
                 syncFolders();
             }
-            else if (xmlhttp.status == 400) {
-                alert('There was an error 400');
-            }
             else {
-                alert('something else other than 200 was returned');
+                alert(xmlhttp.statusText);
             }
         }
     };
@@ -171,6 +172,9 @@ function deleteFolder(folder_name) {
     xmlhttp.send(formData);
 }
 
+// get the folder_order of the folder_list
+// send a POST request to sync_folders.php and 
+// that will reorder the folders in config file accordingly
 function reorderFolders(folder_order) {
 
     var xmlhttp = new XMLHttpRequest();
@@ -179,13 +183,9 @@ function reorderFolders(folder_order) {
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == XMLHttpRequest.DONE) {
             if (xmlhttp.status == 200) {
-
-            }
-            else if (xmlhttp.status == 400) {
-                alert('There was an error 400');
             }
             else {
-                alert('something else other than 200 was returned');
+                alert(xmlhttp.statusText);
             }
         }
     };
