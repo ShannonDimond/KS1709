@@ -23,7 +23,7 @@ var playVideo = "Play";										//Standard command to Play a video
 var pauseVideo = "Pause";									//Standard command to Pause a video
 var muteVideo = "Mute";										//Standard command to Mute a video
 var unmuteVideo = "Unmute";								//Standard command to Unmute a video
-var endPage = "black.html"								//Black HTML page used to set the screens to black
+var endPage = "black.jpg"								//Black HTML page used to set the screens to black
 var invalidFileTypeName = "invalidFileType.png"
 var fileNotFoundName = "fileNotFound.png"
 var loadingName = "loadingSlide.png";
@@ -52,15 +52,19 @@ function startPresentation()
 	$("#nextSlideHeading").show();
 	
 	//Disable the loadSlide button
+	$("#loadSlide").css("color", "white");
 	$("#loadSlide").attr("disabled", true);
 	$("#loadSlide").val("Loading...");
 	
+	//Disable the slide deck
+	validateSlideDeck("disable");
+	
 	//Assign the currentSlideImage to the endPage and send/swap
 	nextSlideName = endPage;
-	nextSlideType = "html";
+	nextSlideType = "jpg";
 	currentSlideName = nextSlideName;
 	currentSlideType = nextSlideType;
-	displayWebPreview("current", webFilePath, currentSlideName);
+	displayImagePreview("current", imageFilePath, currentSlideName);
 	
 	//Assign the first element of the slide deck to 'next' variables
 	$('#order').children('input').each(function() 
@@ -70,6 +74,7 @@ function startPresentation()
 		{
 			nextSlideName = this.id;
 			nextSlideType = this.id.substr(this.id.lastIndexOf('.') + 1);	
+			$(this).addClass("btn-primary-hovered");
 		}
 	});
 	
@@ -95,7 +100,7 @@ function startPresentation()
 	else
 	{
 		nextFileValidity = "invalidFileType";
-		displayNextSlide(nextSlideName, nextFileValidity, "error");
+		displayNextSlide(nextSlideName, nextFileValidity, "error", imageFilePath);
 	}
 }
 
@@ -115,9 +120,11 @@ $(document).ready(function()
 	{
 		var nextFileValidity = "valid";
 		var currentFileValidity = "valid";		//May not be needed?
+		var filePosition = 0;
 		
 		//Disable the loadSlide button
-		//$("#loadSlide").attr("disabled", true);
+		$("#loadSlide").css("color", "white");
+		$("#loadSlide").attr("disabled", true);
 		$("#loadSlide").val("Loading...");
 	
 		if (validateFiletype(videoFiletypes, currentSlideType))
@@ -127,6 +134,9 @@ $(document).ready(function()
 		
 		//Swap the frames
 		sendSwap();
+		
+		//Disable the slide deck
+		validateSlideDeck("disable");
 		
 		//Set the current slide to the next slide
 		currentSlideName = nextSlideName;
@@ -145,6 +155,7 @@ $(document).ready(function()
 				if (index < presentationOrder.length) 
 				{				
 					fileFound = true;
+					filePosition = index;
 					nextSlideName = presentationOrder[index].id;
 					nextSlideType = presentationOrder[index].id.substr(presentationOrder[index].id.lastIndexOf('.') + 1);
 				}
@@ -154,6 +165,7 @@ $(document).ready(function()
 		//If the next slide is the end of the slide deck, display the last slide again
 		if (!fileFound)
 		{
+			fileFound = false;
 			nextSlideName = presentationOrder[presentationOrder.length-1].id;
 			nextSlideType = presentationOrder[presentationOrder.length-1].id.substr(presentationOrder[presentationOrder.length-1].id.lastIndexOf('.') + 1);	
 		}
@@ -167,30 +179,40 @@ $(document).ready(function()
 
 		//Set the current slide preview window
 		//MAY REQUIRE FILE EXISTING CHECKS?
-		if (validateFiletype(videoFiletypes, currentSlideType))
+		if (filePosition == presentationOrder.length || !(fileFound))			//When on the last slide
 		{
-			displayVideoPreview("current", mediaFilePath, currentSlideName);
-			//DEVELOPER NOTES: NEEDS TO BE CHECKED
-			sendVideoControl(playVideo);
-			sendVideoControl(unmuteVideo);
+			if (validateFiletype(imageFiletypes, currentSlideType))
+			{
+				displayImagePreview("current", imageFilePath, currentSlideName);
+			}
 		}
-		else if (validateFiletype(webpageFiletypes, currentSlideType))
+		else 																															// Not on the last slide
 		{
-			displayWebPreview("current", webFilePath, currentSlideName);
-		}
-		else if (validateFiletype(imageFiletypes, currentSlideType))
-		{
-			displayImagePreview("current", mediaFilePath, currentSlideName);
-		}
-		else 
-		{
-			//alert("File Type Error: " + currentSlideName + " has a filetype of " + currentSlideType + ", which isn't a valid filetype");
+			if (validateFiletype(videoFiletypes, currentSlideType))
+			{
+				displayVideoPreview("current", mediaFilePath, currentSlideName);
+				//DEVELOPER NOTES: NEEDS TO BE CHECKED
+				sendVideoControl(playVideo);
+				sendVideoControl(unmuteVideo);
+			}
+			else if (validateFiletype(webpageFiletypes, currentSlideType))
+			{
+				displayWebPreview("current", webFilePath, currentSlideName);
+			}
+			else if (validateFiletype(imageFiletypes, currentSlideType))
+			{
+				displayImagePreview("current", mediaFilePath, currentSlideName);
+			}
+			else 
+			{
+				//alert("File Type Error: " + currentSlideName + " has a filetype of " + currentSlideType + ", which isn't a valid filetype");
+			}
 		}
 		
 		//Indent the current slide in the slide deck
 		$('#order').children('input').each(function() 
 		{
-			if (currentSlideName == this.id)
+			if (nextSlideName == this.id)
 			{				
 				$(this).addClass("btn-primary-hovered");
 			}
@@ -201,22 +223,37 @@ $(document).ready(function()
 		});
 		
 		//Validate the next slide type and display it
-		if (validateFiletype(videoFiletypes, nextSlideType))
+		if (filePosition == presentationOrder.length-1 || !(fileFound))			//When on the last slide
 		{
-			checkFileExists(mediaFilePath, nextSlideName, "video", displayNextSlide)
+			if (validateFiletype(imageFiletypes, nextSlideType))
+			{
+				checkFileExists(imageFilePath, nextSlideName, "image", displayNextSlide)
+			}
+			else
+			{
+				nextFileValidity = "invalidFileType";
+				displayNextSlide(nextSlideName, nextFileValidity, "error", imageFilePath);
+			}
 		}
-		else if (validateFiletype(webpageFiletypes, nextSlideType))
+		else 
 		{
-			checkFileExists(webFilePath, nextSlideName, "web", displayNextSlide)
-		}
-		else if (validateFiletype(imageFiletypes, nextSlideType))
-		{
-			checkFileExists(mediaFilePath, nextSlideName, "image", displayNextSlide)
-		}
-		else
-		{
-			nextFileValidity = "invalidFileType";
-			displayNextSlide(nextSlideName, nextFileValidity, "error");
+			if (validateFiletype(videoFiletypes, nextSlideType))
+			{
+				checkFileExists(mediaFilePath, nextSlideName, "video", displayNextSlide)
+			}
+			else if (validateFiletype(webpageFiletypes, nextSlideType))
+			{
+				checkFileExists(webFilePath, nextSlideName, "web", displayNextSlide)
+			}
+			else if (validateFiletype(imageFiletypes, nextSlideType))
+			{
+				checkFileExists(mediaFilePath, nextSlideName, "image", displayNextSlide)
+			}
+			else
+			{
+				nextFileValidity = "invalidFileType";
+				displayNextSlide(nextSlideName, nextFileValidity, "error", imageFilePath);
+			}
 		}
 	});
 });
@@ -240,8 +277,12 @@ function previewSlide(clicked_id)
 	nextSlideType = currentSlideType;
 	
 	//Disable Load Next Slide button
+	$("#loadSlide").css("color", "white");
 	$("#loadSlide").attr("disabled", true);
 	$("#loadSlide").val("Loading...");
+	
+	//Disable the slide deck
+	validateSlideDeck("disable");
 	
 	//Loop through each element in the slide deck & assign variables
 	$('#order').children('input').each(function() 
@@ -251,11 +292,11 @@ function previewSlide(clicked_id)
 		{
 			nextSlideName = this.id;
 			nextSlideType = this.id.substr(this.id.lastIndexOf('.') + 1);
-			//$(this).addClass("btn-primary-hovered");
+			$(this).addClass("btn-primary-hovered");
 		}
 		else
 		{
-			//$(this).removeClass("btn-primary-hovered");
+			$(this).removeClass("btn-primary-hovered");
 		}
 	});
 	
@@ -281,7 +322,7 @@ function previewSlide(clicked_id)
 	else
 	{
 		nextFileValidity = "invalidFileType";
-		displayNextSlide(nextSlideName, nextFileValidity, "error");
+		displayNextSlide(nextSlideName, nextFileValidity, "error", imageFilePath);
 	}
 }
 
@@ -385,10 +426,11 @@ array, then it returns true. If not, it returns false.
 --------------------------------------------------------*/
 function validateFiletype(filetypeArray, filetype) 
 {
+	var filetypeLowerCase = filetype.toLowerCase();
 	for (var index = 0; index < filetypeArray.length; index++)
 	{
 		//REQUIRES A CHECK TO MAKE THE FILETYPE LOWER CASE!!!!
-		if (filetype == filetypeArray[index])
+		if (filetypeLowerCase == filetypeArray[index])
 		{
 			return true;
 		}
@@ -468,9 +510,9 @@ to the display clients. The letter I is the indication to
 client that it is an image. The filepath is appended to it
 as well as the filename.
 --------------------------------------------------------*/
-function sendImage() 
+function sendImage(path) 
 {
-	socketSend('I' +  mediaFilePath + nextSlideName);
+	socketSend('I' +  path + nextSlideName);
 }
 
 /*--------------------------------------------------------
@@ -596,12 +638,12 @@ function checkFileExists(path, filename, mediaType, callFunction)
 			if (this.status == 200) 
 			{
 				fileValidity = "valid";
-				callFunction(filename, fileValidity, mediaType);
+				callFunction(filename, fileValidity, mediaType, path);
 			}
 			else
 			{
 				fileValidity = "notFound";
-				callFunction(filename, fileValidity, mediaType);
+				callFunction(filename, fileValidity, mediaType, imageFilePath);
 			}
 		}
 	};
@@ -621,7 +663,6 @@ and it displayed "Load Next Slide" in white.
 --------------------------------------------------------*/
 function validateLoadSlideButton(filename, fileValidity)
 {
-	//alert("inside val load slide");
 	//Assign the first element of the slide deck to 'next' variables
 	$('#order').children('input').each(function() 
 	{
@@ -650,6 +691,9 @@ function validateLoadSlideButton(filename, fileValidity)
 			}	
 		}
 	});
+	
+	//Enable the slide deck
+	validateSlideDeck("enable");
 }
 
 /*--------------------------------------------------------
@@ -661,38 +705,45 @@ checks to see if the file is currently valid. If it isn't
 then it displays the appropiate error. If it is valid, it 
 displays either a web, video or image media preview window.
 Finally, it calls the validateLoadSlideButton method.
+
+A large amount of the code here is set on a delay. This is 
+to ensure that the swap procedures are occuring before 
+buffering the net slide. Furthermore, it sets a consistent
+"loading" state to occur upon every slide load in order to
+prevent potential errors.
 --------------------------------------------------------*/
-function displayNextSlide(filename, fileValidity, contentType)
+function displayNextSlide(filename, fileValidity, contentType, path)
 {	
+	var delay = 1100;
 	if (fileValidity == "notFound")
 	{
-		displayImagePreview("next", imageFilePath, fileNotFoundName);
+		setTimeout(function(){ displayImagePreview("next", path, fileNotFoundName) }, delay);
 	}
 	else if (fileValidity == "invalidFileType")
 	{
-		displayImagePreview("next", imageFilePath, invalidFileTypeName);
+		setTimeout(function(){ displayImagePreview("next", path, invalidFileTypeName) },  delay);
 	}
 	else
 	{
 		if (contentType == "video")
 		{
-			displayVideoPreview("next", mediaFilePath, nextSlideName);
-			setTimeout(sendVideo, 100);				//DEVELOPER NOTES: MAY NEED A VIDEOPAUSE HERE. NEEDS TESTING.
+			setTimeout(function(){ displayVideoPreview("next", path, nextSlideName) },  delay);
+			setTimeout(sendVideo, delay);				//DEVELOPER NOTES: MAY NEED A VIDEOPAUSE HERE. NEEDS TESTING.
 		}
 		else if (contentType == "web")
 		{
-			displayWebPreview("next", webFilePath, nextSlideName);
-			setTimeout(sendURL, 100);
+			setTimeout(function(){ displayWebPreview("next", path, nextSlideName) },  delay);
+			setTimeout(sendURL, delay);
 		}
 		else if (contentType == "image")
 		{
-			displayImagePreview("next", mediaFilePath, nextSlideName);
-			setTimeout(sendImage, 100);
+			setTimeout(function(){ displayImagePreview("next", path, nextSlideName) },  delay);
+			setTimeout(function(){ sendImage(path) }, delay);
 		}
 	}
 	
 	//Enable or Disable the loadSlide button
-	validateLoadSlideButton(nextSlideName, fileValidity);
+	setTimeout(function(){ validateLoadSlideButton(nextSlideName, fileValidity) },  delay);
 }
 
 /*--------------------------------------------------------
@@ -717,13 +768,13 @@ function displayErrorPage(errorType)
 	
 	if (errorType == "notFound")
 	{
-		document.getElementById("order").innerHTML += ("<input type='button' class='btn btn-primary btn-md btn-block' id='notFound' value='Unavailable'/>");
+		document.getElementById("order").innerHTML += ("<input type='button' class='btn btn-primary btn-md btn-block' id='notFound' value='Not Found'/>");
 		
 		//Display error message
 		displayImagePreview("current", imageFilePath, slideDeckNotFoundName);
 		displayImagePreview("next", imageFilePath, slideDeckNotFoundName);
 		
-		$("#loadSlide").val("Unavailable");
+		$("#loadSlide").val("Slide Deck Not Found");
 		
 	}
 	else if (errorType == "empty")
@@ -744,4 +795,32 @@ function displayErrorPage(errorType)
 		$(this).css("color", "#990000");
 		$(this).attr("disabled", true);
 	});
+}
+
+/*--------------------------------------------------------
+									Validate Slide Deck
+----------------------------------------------------------
+The purpose of this method is to disable and enable the
+slide deck while the loading process is taking place. 
+If the pass parameter is enable, it will enable all of the
+buttons. Otherwise, it will disable them.
+--------------------------------------------------------*/
+function validateSlideDeck(controlOption)
+{
+	if (controlOption == "enable")
+	{
+		//alert("enable");
+		$('#order').children('input').each(function() 
+		{
+			$(this).attr("disabled", false);
+		});		
+	}
+	else if (controlOption == "disable")
+	{
+		//alert("disable");
+		$('#order').children('input').each(function() 
+		{
+			$(this).attr("disabled", true);
+		});
+	}
 }
