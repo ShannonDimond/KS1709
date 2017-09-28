@@ -1,9 +1,0 @@
-[
-"media/Widevision.mp4",
-"media/Jay.mp4",
-"media/Slide1.jpg",
-"media/Slide2.jpg",
-"media/Slide3.jpg",
-"media/Slide4.jpg",
-"media/Slide5.jpg"
-]
