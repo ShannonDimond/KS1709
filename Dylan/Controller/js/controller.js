@@ -43,8 +43,9 @@ once loaded.
 --------------------------------------------------------*/
 function startPresentation()
 {
-	var index = 0;
-	var nextFileValidity = "valid";
+	var delay = 200;								//The delay, in MS, before buffering the next slide
+	var index = 0;									//Tracks the position of the next slide in the slide deck
+	var nextFileValidity = "valid";	//Tracks the whether or not a file is safe to load
 
 	//Show elements
 	$("#transitionDiv").show();
@@ -87,20 +88,20 @@ function startPresentation()
 	//Validate the next slide type and display it
 	if (validateFiletype(videoFiletypes, nextSlideType))
 	{
-		checkFileExists(mediaFilePath, nextSlideName, "video", displayNextSlide)
+		checkFileExists(mediaFilePath, nextSlideName, "video", delay, displayNextSlide)
 	}
 	else if (validateFiletype(webpageFiletypes, nextSlideType))
 	{
-		checkFileExists(webFilePath, nextSlideName, "web", displayNextSlide)
+		checkFileExists(webFilePath, nextSlideName, "web", delay, displayNextSlide)
 	}
 	else if (validateFiletype(imageFiletypes, nextSlideType))
 	{
-		checkFileExists(mediaFilePath, nextSlideName, "image", displayNextSlide)
+		checkFileExists(mediaFilePath, nextSlideName, "image", delay, displayNextSlide)
 	}
 	else
 	{
 		nextFileValidity = "invalidFileType";
-		displayNextSlide(nextSlideName, nextFileValidity, "error", imageFilePath);
+		displayNextSlide(nextSlideName, nextFileValidity, "error", imageFilePath, delay);
 	}
 }
 
@@ -112,21 +113,27 @@ slide currently in the "Next Slide" section of the interface.
 It sets the current slide to the next slide, then looks through
 the slide deck and determines what the new next slide will be.
 It swaps the frames and then loads the next slide into the
-hidden frame.
+hidden frame. It will check whether the next slide is of a 
+valid filetype and can be loaded, if not an error message
+will be displayed.
 --------------------------------------------------------*/
 $(document).ready(function() 
 {
 	$("#loadSlide").click(function() 
 	{
-		var nextFileValidity = "valid";
-		var currentFileValidity = "valid";		//May not be needed?
-		var filePosition = 0;
+		var delay = 1100;								//The delay, in MS, before buffering the next slid
+		var nextFileValidity = "valid";	//Tracks the whether or not a file is safe to load
+		var filePosition = 0;						//Tracks the position of the next slide in the slide deck
+		var fileFound;									//Tracks if the file has been found or not
+		var index;											//Tracks the position of the next slide in the slide deck
+		var presentationOrder;					//Holds the contents of the slide deck
 		
 		//Disable the loadSlide button
 		$("#loadSlide").css("color", "white");
 		$("#loadSlide").attr("disabled", true);
 		$("#loadSlide").val("Loading...");
 	
+		//If the current slide is a video, pause it. Prevents playing in the background
 		if (validateFiletype(videoFiletypes, currentSlideType))
 		{
 			sendVideoControl(pauseVideo);
@@ -138,17 +145,19 @@ $(document).ready(function()
 		//Disable the slide deck
 		validateSlideDeck("disable");
 		
+		//Set the Next Slide to a loading screen
+		displayImagePreview("next", imageFilePath, loadingName);
+		
 		//Set the current slide to the next slide
 		currentSlideName = nextSlideName;
 		currentSlideType = nextSlideType;
 		
 		//Set the Next Slide to the next slide in the presentation play list
-		var presentationOrder = document.getElementById("order").childNodes;
-		var fileFound;
-		var index;
+		presentationOrder = document.getElementById("order").childNodes;
 
 		for (index = 0; index < presentationOrder.length; index++) 
 		{
+			//Find the current slide, increase the index by 1 and then assign the next slide
 			if (currentSlideName == presentationOrder[index].id && !(fileFound))
 			{
 				index++;
@@ -173,9 +182,6 @@ $(document).ready(function()
 		//Display the Next and Current slide names in the slide headings
 		$("#currentSlideHeading").html("Current Slide: " + currentSlideName.substr(currentSlideName.lastIndexOf('/') + 1));
 		$("#nextSlideHeading").html("Next Slide: " + nextSlideName.substr(nextSlideName.lastIndexOf('/') + 1));
-		
-		//Set the Next Slide to a loading screen
-		displayImagePreview("next", imageFilePath, loadingName);
 
 		//Set the current slide preview window
 		//MAY REQUIRE FILE EXISTING CHECKS?
@@ -191,7 +197,7 @@ $(document).ready(function()
 			if (validateFiletype(videoFiletypes, currentSlideType))
 			{
 				displayVideoPreview("current", mediaFilePath, currentSlideName);
-				//DEVELOPER NOTES: NEEDS TO BE CHECKED
+				//DEVELOPER NOTES: NEEDS TO BE CHECKED IF VIDEO CONTROLS REQUIRED
 				sendVideoControl(playVideo);
 				sendVideoControl(unmuteVideo);
 			}
@@ -202,10 +208,6 @@ $(document).ready(function()
 			else if (validateFiletype(imageFiletypes, currentSlideType))
 			{
 				displayImagePreview("current", mediaFilePath, currentSlideName);
-			}
-			else 
-			{
-				//alert("File Type Error: " + currentSlideName + " has a filetype of " + currentSlideType + ", which isn't a valid filetype");
 			}
 		}
 		
@@ -227,32 +229,32 @@ $(document).ready(function()
 		{
 			if (validateFiletype(imageFiletypes, nextSlideType))
 			{
-				checkFileExists(imageFilePath, nextSlideName, "image", displayNextSlide)
+				checkFileExists(imageFilePath, nextSlideName, "image", delay, displayNextSlide)
 			}
 			else
 			{
 				nextFileValidity = "invalidFileType";
-				displayNextSlide(nextSlideName, nextFileValidity, "error", imageFilePath);
+				displayNextSlide(nextSlideName, nextFileValidity, "error", imageFilePath, delay);
 			}
 		}
-		else 
+		else 		//Not the last slide
 		{
 			if (validateFiletype(videoFiletypes, nextSlideType))
 			{
-				checkFileExists(mediaFilePath, nextSlideName, "video", displayNextSlide)
+				checkFileExists(mediaFilePath, nextSlideName, "video", delay, displayNextSlide)
 			}
 			else if (validateFiletype(webpageFiletypes, nextSlideType))
 			{
-				checkFileExists(webFilePath, nextSlideName, "web", displayNextSlide)
+				checkFileExists(webFilePath, nextSlideName, "web", delay, displayNextSlide)
 			}
 			else if (validateFiletype(imageFiletypes, nextSlideType))
 			{
-				checkFileExists(mediaFilePath, nextSlideName, "image", displayNextSlide)
+				checkFileExists(mediaFilePath, nextSlideName, "image", delay, displayNextSlide)
 			}
 			else
 			{
 				nextFileValidity = "invalidFileType";
-				displayNextSlide(nextSlideName, nextFileValidity, "error", imageFilePath);
+				displayNextSlide(nextSlideName, nextFileValidity, "error", imageFilePath, delay);
 			}
 		}
 	});
@@ -262,15 +264,19 @@ $(document).ready(function()
 											Preview Slide
 ----------------------------------------------------------
 Processes the Preview Slide deck. This function loads the 
-elements of the slide deck into a HTML object. It then 
+elements of the slide deck into an object. It then 
 iterates through them to find the one the user clicked.
-once found it sets the slide preview to that specific slide
-and then buffers it in the hidden iFrame.
+Once found it sets the slide preview to that specific slide
+and then buffers it in the hidden iFrame. It will check 
+whether the next slide is of a valid filetype and can be 
+loaded, if not an error message will be displayed.
 --------------------------------------------------------*/
 function previewSlide(clicked_id) 
 {
-	var index = 0;
-	var nextFileValidity = "valid";
+	var index = 0;										//Tracks the position of the next slide in the slide deck
+	var nextFileValidity = "valid";		//Tracks the whether or not a file is safe to load
+	var delay = 200;									//The delay, in MS, before buffering the next slide
+	var filePosition = 0;							//Tracks the position of the next slide in the slide deck
 	
 	//Set the current to the next fields
 	nextSlideName = currentSlideName;
@@ -293,6 +299,7 @@ function previewSlide(clicked_id)
 			nextSlideName = this.id;
 			nextSlideType = this.id.substr(this.id.lastIndexOf('.') + 1);
 			$(this).addClass("btn-primary-hovered");
+			filePosition = index;
 		}
 		else
 		{
@@ -307,22 +314,37 @@ function previewSlide(clicked_id)
 	displayImagePreview("next", imageFilePath, loadingName);
 	
 	//Validate the next slide type and display it
-	if (validateFiletype(videoFiletypes, nextSlideType))
+	if (filePosition == $("#order *").length)			//The last slide in the slide deck
 	{
-		checkFileExists(mediaFilePath, nextSlideName, "video", displayNextSlide)
+		if (validateFiletype(imageFiletypes, nextSlideType))
+		{
+			checkFileExists(imageFilePath, nextSlideName, "image", delay, displayNextSlide)
+		}
+		else
+		{
+			nextFileValidity = "invalidFileType";
+			displayNextSlide(nextSlideName, nextFileValidity, "error", imageFilePath, delay);
+		}
 	}
-	else if (validateFiletype(webpageFiletypes, nextSlideType))
+	else		//Not the last slide
 	{
-		checkFileExists(webFilePath, nextSlideName, "web", displayNextSlide)
-	}
-	else if (validateFiletype(imageFiletypes, nextSlideType))
-	{
-		checkFileExists(mediaFilePath, nextSlideName, "image", displayNextSlide)
-	}
-	else
-	{
-		nextFileValidity = "invalidFileType";
-		displayNextSlide(nextSlideName, nextFileValidity, "error", imageFilePath);
+		if (validateFiletype(videoFiletypes, nextSlideType))
+		{
+			checkFileExists(mediaFilePath, nextSlideName, "video", delay, displayNextSlide)
+		}
+		else if (validateFiletype(webpageFiletypes, nextSlideType))
+		{
+			checkFileExists(webFilePath, nextSlideName, "web", delay, displayNextSlide)
+		}
+		else if (validateFiletype(imageFiletypes, nextSlideType))
+		{
+			checkFileExists(mediaFilePath, nextSlideName, "image", delay, displayNextSlide)
+		}
+		else
+		{
+			nextFileValidity = "invalidFileType";
+			displayNextSlide(nextSlideName, nextFileValidity, "error", imageFilePath, delay);
+		}
 	}
 }
 
@@ -427,9 +449,9 @@ array, then it returns true. If not, it returns false.
 function validateFiletype(filetypeArray, filetype) 
 {
 	var filetypeLowerCase = filetype.toLowerCase();
+	
 	for (var index = 0; index < filetypeArray.length; index++)
 	{
-		//REQUIRES A CHECK TO MAKE THE FILETYPE LOWER CASE!!!!
 		if (filetypeLowerCase == filetypeArray[index])
 		{
 			return true;
@@ -442,7 +464,11 @@ function validateFiletype(filetypeArray, filetype)
 /*--------------------------------------------------------
 										Display Image Preview
 ----------------------------------------------------------
-COMMENTS
+The purpose of this method is to display the preview for
+an image file. It shows the image window and hides any 
+other display windows. It accepts paramaters for which
+windows (current or next) to hide/show as well as for the
+location of the image to show.
 --------------------------------------------------------*/
 function displayImagePreview(previewWindowName, filePath, filename) 
 {
@@ -455,7 +481,11 @@ function displayImagePreview(previewWindowName, filePath, filename)
 /*--------------------------------------------------------
 										Display Web Preview
 ----------------------------------------------------------
-COMMENTS
+The purpose of this method is to display the preview for
+a html file. It shows the html window and hides any 
+other display windows. It accepts paramaters for which
+windows (current or next) to hide/show as well as for the
+location of the html page to show.
 --------------------------------------------------------*/
 function displayWebPreview(previewWindowName, filePath, filename) 
 {
@@ -468,7 +498,11 @@ function displayWebPreview(previewWindowName, filePath, filename)
 /*--------------------------------------------------------
 									 Display Video Preview
 ----------------------------------------------------------
-COMMENTS
+The purpose of this method is to display the preview for
+a video file. It shows the video window and hides any 
+other display windows. It accepts paramaters for which
+windows (current or next) to hide/show as well as for the
+location of the video to show.
 --------------------------------------------------------*/
 function displayVideoPreview(previewWindowName, filePath, filename) 
 {
@@ -476,6 +510,11 @@ function displayVideoPreview(previewWindowName, filePath, filename)
 	$("#" + previewWindowName + "SlideVideo").show();
 	$("#" + previewWindowName + "SlideImage").hide();
 	$("#" + previewWindowName + "SlideWebpage").hide();
+	
+	if (previewWindowName == "next")
+	{
+		document.getElementById("nextSlideVideo").currentTime = 1;
+	}
 }
 
 /*--------------------------------------------------------
@@ -494,7 +533,10 @@ function sendURL()
 /*--------------------------------------------------------
 								     SEND HTML (DELETE?)
 ----------------------------------------------------------
-FILL IN
+The purpose of this function is to send html code to the
+display clients. The letter H is the indication to the
+client that it is html code. The filepath is appended to it 
+as well as the filename.
 --------------------------------------------------------*/
 function sendHTML() 
 {
@@ -626,7 +668,7 @@ up. If it can, then it calls the callback function with a
 fileValidity parameter of valid. Otherwise, it calls it 
 with a notFound error.
 --------------------------------------------------------*/
-function checkFileExists(path, filename, mediaType, callFunction)
+function checkFileExists(path, filename, mediaType, delay, callFunction)
 {
 	var fileValidity = "notFound";
 	
@@ -638,12 +680,12 @@ function checkFileExists(path, filename, mediaType, callFunction)
 			if (this.status == 200) 
 			{
 				fileValidity = "valid";
-				callFunction(filename, fileValidity, mediaType, path);
+				callFunction(filename, fileValidity, mediaType, path, delay);
 			}
 			else
 			{
 				fileValidity = "notFound";
-				callFunction(filename, fileValidity, mediaType, imageFilePath);
+				callFunction(filename, fileValidity, mediaType, imageFilePath, delay);
 			}
 		}
 	};
@@ -659,7 +701,7 @@ button depending upon the validity of the next slide. If
 the slide is either of an invalid type of it isn't found
 on the server, then the button is disabled and a red message
 is displayed on the button. Otherwise, the button is enabled 
-and it displayed "Load Next Slide" in white.
+and it displays "Load Next Slide" in white.
 --------------------------------------------------------*/
 function validateLoadSlideButton(filename, fileValidity)
 {
@@ -708,13 +750,12 @@ Finally, it calls the validateLoadSlideButton method.
 
 A large amount of the code here is set on a delay. This is 
 to ensure that the swap procedures are occuring before 
-buffering the net slide. Furthermore, it sets a consistent
-"loading" state to occur upon every slide load in order to
-prevent potential errors.
+buffering the net slide. The value of delay is dependant
+upon the calling function as smaller delays can be utilised
+when simply previewing a slide without a sendSwap() occuring.
 --------------------------------------------------------*/
-function displayNextSlide(filename, fileValidity, contentType, path)
+function displayNextSlide(filename, fileValidity, contentType, path, delay)
 {	
-	var delay = 1100;
 	if (fileValidity == "notFound")
 	{
 		setTimeout(function(){ displayImagePreview("next", path, fileNotFoundName) }, delay);
@@ -723,7 +764,7 @@ function displayNextSlide(filename, fileValidity, contentType, path)
 	{
 		setTimeout(function(){ displayImagePreview("next", path, invalidFileTypeName) },  delay);
 	}
-	else
+	else			//It's a valid file
 	{
 		if (contentType == "video")
 		{
@@ -750,10 +791,11 @@ function displayNextSlide(filename, fileValidity, contentType, path)
 									Display Error Page
 ----------------------------------------------------------
 The purpose of this method is to display appropiate error
-messages regarding the reading of the presentationOrder.txt 
+messages regarding the state of the presentationOrder.txt 
 file. If the fie isn't found, a specific message is displayed.
 If the file is empty, a different error messae is displayed
-instead.
+instead. It then disables the slide deck and sets the color
+of any text in it to red.
 --------------------------------------------------------*/
 function displayErrorPage(errorType)
 {
@@ -809,7 +851,6 @@ function validateSlideDeck(controlOption)
 {
 	if (controlOption == "enable")
 	{
-		//alert("enable");
 		$('#order').children('input').each(function() 
 		{
 			$(this).attr("disabled", false);
@@ -817,7 +858,6 @@ function validateSlideDeck(controlOption)
 	}
 	else if (controlOption == "disable")
 	{
-		//alert("disable");
 		$('#order').children('input').each(function() 
 		{
 			$(this).attr("disabled", true);
