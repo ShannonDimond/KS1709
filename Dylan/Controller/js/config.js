@@ -1,5 +1,5 @@
 var CONFIG = {
- 'relay': 'ws://192.168.1.4:3000/relay',
+ 'relay': 'ws://192.168.1.3:3000/relay',
  //'relay': 'ws://goo.scem.ws:3000/relay',
  //'relay': 'ws://192.168.1.2:3000/relay',
  //'ws': 'ws://137.154.151.239:3000/relay',

@@ -30,6 +30,8 @@ function handleMesg( data )
 				break;
 			case 'N':
 				handleUnlimited();
+			case 'F':
+				handleFlush();
 				break;
 			default:
 				console.log('Unknown cmd='+ cmd);
@@ -94,6 +96,22 @@ function handleSwap()
 	//console.log("post-swap hidFrame:"+hidFrame);
 }
 
+function handleFlush() {
+  console.log('Flushing frames');
+  if(visFrame !== 'htmlFrame0') {
+    document.getElementById( 'htmlFrame0' ).innerHTML = '' }
+  if(visFrame !== 'htmlFrame1') {
+    document.getElementById( 'htmlFrame1' ).innerHTML = '' }
+  if(visFrame !== 'iFrame0') {
+    document.getElementById( 'iFrame0' ).src = '' }
+  if(visFrame !== 'iFrame1') {
+    document.getElementById( 'iFrame1' ).src = '' }
+  if(visFrame !== 'vidFrame0') {
+    document.getElementById( 'vidFrame0' ).innerHTML = '' }
+  if(visFrame !== 'vidFrame1') {
+    document.getElementById( 'vidFrame1' ).innerHTML = '' }
+}
+
 function handleReload() {
 location.reload();
 }
@@ -142,12 +160,24 @@ function handleVideoControl(conArg) {
 		case 'Mute':
 			document.getElementById('v'+visFrame).volume = 0;
 			break;
-	 case 'Unmute':
+		case 'Unmute':
 			document.getElementById('v'+visFrame).volume = 1;
 			break;
-	 default:
-			document.getElementById('v'+visFrame).currentTime = conArg;
-		 break;
+		default:			//Check the second letter to see if its a volume or time command
+			var secondcmd = conArg.charAt(0);
+			var arg = conArg.substring(1, conArg.length);
+		
+			if (secondcmd == 'V')
+			{
+				
+				document.getElementById('v'+visFrame).volume = arg;
+			}
+			else if (secondcmd == 'T')
+			{
+				document.getElementById('v'+visFrame).currentTime = arg;
+			}
+				
+			break;
 	}
 }
 
