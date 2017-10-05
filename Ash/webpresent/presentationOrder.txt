@@ -1,5 +1,4 @@
 [
-    "Claras.mp4",
     "SlideDeck/Slide1.JPG",
     "SlideDeck/Slide2.JPG",
     "SlideDeck/Slide3.JPG",
