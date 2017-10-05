@@ -139,10 +139,6 @@ function handleVideoControl(conArg) {
 		case 'Play':
 			document.getElementById('v'+visFrame).play();
 			break;
-		case 'Rewind':
-			document.getElementById('v'+visFrame).pause();
-			document.getElementById('v'+visFrame).currentTime = 0.1;
-			break;
 		case 'Mute':
 			document.getElementById('v'+visFrame).volume = 0;
 			break;
