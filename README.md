@@ -3,7 +3,9 @@ WebPresent
 
 Initialising uploder
 
-change dir to the uploder folder( cd/Desktop/folder_uploader)
-php -S localhost:8000
+# Save the "webpresent" folder on the server root
+# Give write permission to "Presentation" Folder and "presentationOrder.txt", "uploader_log.txt" files
+
+##### If the directory needs to be changed from server root, please change accordingly in "variables.php"
 
 
