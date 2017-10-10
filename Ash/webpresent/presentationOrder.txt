@@ -1,23 +1,2 @@
 [
-    "SlideDeck/Slide1.JPG",
-    "SlideDeck/Slide2.JPG",
-    "SlideDeck/Slide3.JPG",
-    "SlideDeck/Slide4.JPG",
-    "SlideDeck/Slide5.JPG",
-    "SlideDeck/Slide6.JPG",
-    "SlideDeck/Slide7.JPG",
-    "SlideDeck/Slide8.JPG",
-    "SlideDeck/Slide9.JPG",
-    "SlideDeck/Slide10.JPG",
-    "SlideDeck/Slide11.JPG",
-    "SlideDeck/Slide12.JPG",
-    "SlideDeck/Slide13.JPG",
-    "SlideDeck/Slide14.JPG",
-    "SlideDeck/Slide15.JPG",
-    "SlideDeck/Slide16.JPG",
-    "SlideDeck/Slide17.JPG",
-    "SlideDeck/Slide18.JPG",
-    "SlideDeck/Slide19.JPG",
-    "SlideDeck/Slide20.JPG",
-    "SlideDeck/Slide21.JPG"
 ]
