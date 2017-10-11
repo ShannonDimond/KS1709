@@ -28,57 +28,53 @@
 <br>
 <div class="container" style="width: 98%; margin-top: 30px; margin-bottom: 30px; margin-left: 1%; margin-right: 1%">
 	<div class="row">
-	    <div class="col-md-10">
-	        <div class="row">
-			    <div class="col-md-4">
-			    <ul>
-			        <li><a class="active" href="controller.html">Controller</a></li>
-				    <li><a href="uploader.html">Uploader</a></li>
-				    <li><a href="display.html">Display</a></li>
-			    </ul>
-			        </br>
-			        <input type='button' disabled class='circle' id='RelayStatus'/>
-		        </div>
-			    <div class="col-md-8">
+	  <div class="col-md-10">
+	    <div class="row">
+				<div class="col-md-4">
+					<ul>
+						<li><a class="active" href="controller.html">Controller</a></li>
+						<li><a href="uploader.html">Uploader</a></li>
+						<li><a href="display.html">Display</a></li>
+					</ul>
+					</br>
+					<input type='button' disabled class='circle' id='RelayStatus'/>
+				</div>
+				<div class="col-md-8">
 					<h1>WebPresent Controller</h1>
-			    </div>
-	        </div>
-	        <div class="row">
-		        <div class="col-md-6">
-			        <h3 id="currentSlideHeading" align="center" hidden>Current Slide</h3>
-							<span class="error" id="currentError" hidden></span>
-			        <iframe id="currentSlideWebpage" style="min-width: 100%; min-height: 100%" src="" class="embed-responsive-item" hidden></iframe>
-			        <image id="currentSlideImage" style="min-width: 100%; min-height: 100%" src="" class="img-responsive" allowtransparency="true" hidden></image>
-			        <video id='currentSlideVideo' style="max-width: 100%; max-height: 100%" autoplay="autoplay" preload="metadata" class="embed-responsive-item" controls controlsList="nodownload nofullscreen" hidden><source src="" type="video/mp4"></video>
-			<!-- <input type="button" style="width: 140px" class="btn btn-primary btn-md" id="Swap" value="Send Swap (Test)" onclick="sendSwap(0);" /> -->
-		        </div>
-		        <div class="col-md-6">
-			        <h3 id="nextSlideHeading" align="center" hidden>Next Slide</h3>
-							<span class="error" id="nextError" hidden></span>
-			        <iframe id="nextSlideWebpage" height="315" width="560" allowfullscreen="" frameborder="0" hidden></iframe>
-			        <image id="nextSlideImage" style="min-width: 100%; min-height: 100%" src="" class="img-responsive" allowtransparency="true" hidden></image>
-			        <video id='nextSlideVideo' style="max-width: 100%; max-height: 100%" preload="metadata" class="embed-responsive-item" muted controls controlsList="nodownload nofullscreen" hidden><source src="" type="video/mp4"></video>
-			        <br/><br/>
-			        <br/><br/>
-			        </br></br>
-		        </div>
-		    </div>
-        </div>		        
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6">
+					<h3 id="currentSlideHeading" align="center" hidden>Current Slide</h3>
+					<span class="error" id="currentError" hidden></span>
+					<iframe id="currentSlideWebpage" style="min-width: 100%; min-height: 100%" src="" class="embed-responsive-item" hidden></iframe>
+					<image id="currentSlideImage" style="min-width: 100%; min-height: 100%" src="" class="img-responsive" allowtransparency="true" hidden></image>
+					<video id='currentSlideVideo' style="max-width: 100%; max-height: 100%" autoplay="autoplay" preload="metadata" class="embed-responsive-item" controls controlsList="nodownload nofullscreen" hidden><source src="" type="video/mp4"></video>
+				</div>
+				<div class="col-md-6">
+					<h3 id="nextSlideHeading" align="center" hidden>Next Slide</h3>
+					<span class="error" id="nextError" hidden></span>
+					<iframe id="nextSlideWebpage" height="315" width="560" allowfullscreen="" frameborder="0" hidden></iframe>
+					<image id="nextSlideImage" style="min-width: 100%; min-height: 100%" src="" class="img-responsive" allowtransparency="true" hidden></image>
+					<video id='nextSlideVideo' style="max-width: 100%; max-height: 100%" preload="metadata" class="embed-responsive-item" muted controls controlsList="nodownload nofullscreen" hidden><source src="" type="video/mp4"></video>
+					<br/><br/>
+					<br/><br/>
+					<br/><br/>
+				</div>
+			</div>
+    </div>		        
 		<div class="col-md-2">
 			<div id="order" style="width: 175px; max-height: 425px; overflow-y: scroll;">
 				<!-- Slide Deck is created in here -->
 			</div>
-	        <div id="transitionDiv" hidden>
-		        <h4><u>Transition Type</u></h4>
-		        <input type="radio" id="transitionType" name="transitionType" value="instant" checked="checked" />Instant<br>
-		        <input type="radio" id="transitionType" name="transitionType" value="blend" />Blend<br>
-		        </br>
-			    <input type="button" style="width: 163px" class="btn btn-primary btn-md" id="loadSlide" value="Load Next Slide" />
-		    </div>
-	    </div>		    
+			<div id="transitionDiv" hidden>
+				<h4><u>Transition Type</u></h4>
+				<input type="radio" id="transitionType" name="transitionType" value="instant" checked="checked" />Instant<br>
+				<input type="radio" id="transitionType" name="transitionType" value="blend" />Blend<br></br>
+				<input type="button" style="width: 163px" class="btn btn-primary btn-md" id="loadSlide" value="Load Next Slide" />
+			</div>
+	  </div>		    
 	</div>
 </div>
-<!-- Config from settings.js
-<pre><div id="config"></div></pre> -->
 </body>
 </html>

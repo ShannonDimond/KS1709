@@ -1,8 +1,15 @@
 /*--------------------------------------------------------
 									DEVELOPER NOTES
 ----------------------------------------------------------
-System currently accepts html's, may need to be removed.
---------------------------------------------------------*/
+No known bugs as of system handover. The system is designed
+to send the same content to all clients. With minor modification
+it should be possible to specify which clients to send a slide
+to. 
+
+The video controls are default HTML5 video controls, the
+system may require a custom video player in the future to 
+control/limit what sound is played on the controller.
+*/
 
 
 /*--------------------------------------------------------
@@ -175,7 +182,6 @@ $(document).ready(function()
 		$("#nextSlideHeading").html("Next Slide: " + nextSlideName.substr(nextSlideName.lastIndexOf('/') + 1));
 
 		//Set the current slide preview window
-		//MAY REQUIRE FILE EXISTING CHECKS?
 		if (filePosition == presentationOrder.length || !(fileFound))			//When on the last slide
 		{
 			if (validateFiletype(imageFiletypes, currentSlideType))
@@ -389,7 +395,7 @@ function loadSlidePreview()
 							{
 								if (!(validateFiletype(imageFiletypes, this.id.substr(this.id.lastIndexOf('.') + 1))))
 								{
-									$(this).css("color", "#ef1541");
+									$(this).css("color", "#990000");
 								}
 							}
 						}
@@ -491,6 +497,9 @@ a html file. It shows the html window and hides any
 other display windows. It accepts paramaters for which
 windows (current or next) to hide/show as well as for the
 location of the html page to show.
+
+CURRENTLY NOT USED, THE PROGRAM DOESN'T ACCEPT HTML.
+CAN BE IMPLEMENTED LATER VERY EASILY.
 --------------------------------------------------------*/
 function displayWebPreview(previewWindowName, filePath, filename) 
 {
@@ -546,6 +555,8 @@ The purpose of this function is to send the next HTML slide
 to the display clients. The letter U is the indication to
 client that it is a HTML page/URL. The filepath is appended 
 to it as well as the filename.
+
+CURRENTLY NOT USED AT ALL
 --------------------------------------------------------*/
 function sendFlush() 
 {
@@ -553,7 +564,7 @@ function sendFlush()
 }
 
 /*--------------------------------------------------------
-								     SEND HTML (DELETE?)
+								         Send HTML 
 ----------------------------------------------------------
 The purpose of this function is to send html code to the
 display clients. The letter H is the indication to the
@@ -606,10 +617,12 @@ function sendTransition(transitionType)
 }
 
 /*--------------------------------------------------------
-										TESTING VIDEO CONTROLS
+								      Video Controls
 ----------------------------------------------------------
-THIS WILL BE DELETED ONCE A WORKING VIDEO CONTROL INTERFACE
-IS CREATED. FUNCTION WILL WORK DIFFERENTLY.
+The purpose of this function is to modify the way in which
+the default HTML5 video controls work. Each action, such as
+pause, mute etc will send an appropiate message to the 
+display clients.
 --------------------------------------------------------*/
 
 $(document).ready(function() 
@@ -655,16 +668,6 @@ in control option to the message.
 function sendVideoControl(controlOption) 
 {
 	socketSend('C' + controlOption);
-}
-
-/*--------------------------------------------------------
-												Send Reload
-----------------------------------------------------------
-FILL IN, WILL BE IMPLEMENTED AT SOME STAGE
---------------------------------------------------------*/
-function sendReload() 
-{
-  socketSend('R');
 }
 
 /*--------------------------------------------------------
@@ -728,15 +731,15 @@ function validateLoadSlideButton(filename, fileValidity)
 			{
 				$("#loadSlide").attr("disabled", true);
 				$("#loadSlide").val("Invalid File Type");
-				$("#loadSlide").css("color", "#ef1541");
-				$(this).css("color", "#ef1541");
+				$("#loadSlide").css("color", "#990000");
+				$(this).css("color", "#990000");
 			}
 			else if (fileValidity == "notFound")
 			{
 				$("#loadSlide").attr("disabled", true);
 				$("#loadSlide").val("File Not Found");
-				$("#loadSlide").css("color", "#ef1541");
-				$(this).css("color", "#ef1541");
+				$("#loadSlide").css("color", "#990000");
+				$(this).css("color", "#990000");
 			}
 			else if (fileValidity == "valid")
 			{
@@ -773,7 +776,7 @@ function displayNextSlide(filename, fileValidity, contentType, path, delay)
 	if (contentType == "video")
 	{
 		setTimeout(function(){ displayVideoPreview("next", path, nextSlideName) },  delay);
-		setTimeout(sendVideo, delay);				//DEVELOPER NOTES: MAY NEED A VIDEOPAUSE HERE. NEEDS TESTING.		
+		setTimeout(sendVideo, delay);	
 	}
 	else if (contentType == "web")
 	{
@@ -795,10 +798,9 @@ function displayNextSlide(filename, fileValidity, contentType, path, delay)
 ----------------------------------------------------------
 The purpose of this method is to display appropiate error
 messages regarding the state of the presentationOrder.txt 
-file. If the fie isn't found, a specific message is displayed.
-If the file is empty, a different error messae is displayed
-instead. It then disables the slide deck and sets the color
-of any text in it to red.
+file. Depending upon the input paramater a different error
+message is displayed on the screen. It then disables the 
+slide deck and sets the color of any text in it to red.
 --------------------------------------------------------*/
 function displayErrorPage(errorType)
 {
@@ -812,7 +814,7 @@ function displayErrorPage(errorType)
 
 	//Disable the loadSlide button
 	$("#loadSlide").attr("disabled", true);
-	$("#loadSlide").css("color", "#ef1541");
+	$("#loadSlide").css("color", "#990000");
 	
 	if (errorType == "notFound")
 	{
@@ -829,7 +831,7 @@ function displayErrorPage(errorType)
 		//Set the slide deck values to red
 		$('#order').children('input').each(function() 
 		{
-			$(this).css("color", "#ef1541");
+			$(this).css("color", "#990000");
 			$(this).attr("disabled", true);
 		});
 	}
@@ -848,7 +850,7 @@ function displayErrorPage(errorType)
 		//Set the slide deck values to red
 		$('#order').children('input').each(function() 
 		{
-			$(this).css("color", "#ef1541");
+			$(this).css("color", "#990000");
 			$(this).attr("disabled", true);
 		});
 	}
@@ -868,7 +870,7 @@ function displayErrorPage(errorType)
 		//Set the slide deck values to red
 		$('#order').children('input').each(function() 
 		{
-			$(this).css("color", "#ef1541");
+			$(this).css("color", "#990000");
 			$(this).attr("disabled", true);
 		});
 	}
@@ -884,7 +886,7 @@ function displayErrorPage(errorType)
 		{
 			if (nextSlideName == this.id)
 			{
-				$(this).css("color", "#ef1541");
+				$(this).css("color", "#990000");
 				$(this).attr("disabled", true);
 			}
 			else
@@ -905,7 +907,7 @@ function displayErrorPage(errorType)
 		{
 			if (nextSlideName == this.id)
 			{
-				$(this).css("color", "#ef1541");
+				$(this).css("color", "#990000");
 				$(this).attr("disabled", true);
 			}
 			else
