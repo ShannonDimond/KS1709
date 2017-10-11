@@ -12,7 +12,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 function getDirContents($dir, &$results = array()) {
 
-    $len = strlen($_SERVER['DOCUMENT_ROOT'].'/webpresent/Presentation');
+    $len = strlen($GLOBALS['uploadDir']);
     $files = scandir($dir, SCANDIR_SORT_NONE);
     foreach($files as $key => $value) {
         $path = $dir . "/"   . $value;
@@ -33,7 +33,7 @@ switch($method) {
     case 'GET':
         $file = fopen($fileName , "r") or die("Unable to open file!");
 
-        $current_dirs = getDirContents($uploadDir);
+        $current_dirs = getDirContents($GLOBALS['uploadDir']);
         $dirs = (array) json_decode(fread($file, filesize($fileName)));
         fclose($file);
         $dirs = array_unique(array_merge($dirs,$current_dirs));

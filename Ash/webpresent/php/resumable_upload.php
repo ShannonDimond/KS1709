@@ -105,11 +105,12 @@ function createFileFromChunks($temp_dir, $fileName, $chunkSize, $totalSize,$tota
     // If the Size of all the chunks on the server is equal to the size of the file uploaded.
     if ($total_files_on_server_size >= $totalSize) {
     // create the final destination file ]
-        if (!is_dir(dirname("../Presentation/".$fileName))) {
-            mkdir(dirname("../Presentation/".$fileName), 0777, true);
-	    chmod(dirname("../Presentation/".$fileName), 0777);
+
+        if (!is_dir(dirname($GLOBALS['uploadDir'].$GLOBALS['ds'].$fileName))) {
+            mkdir(dirname($GLOBALS['uploadDir'].$GLOBALS['ds'].$fileName), 0777, true);
+	    chmod(dirname($GLOBALS['uploadDir'].$GLOBALS['ds'].$fileName), 0777);
         }
-        if (($fp = fopen("../Presentation/".$fileName, 'w')) !== false) {
+        if (($fp = fopen($GLOBALS['uploadDir'].$GLOBALS['ds'].$fileName, 'w')) !== false) {
             for ($i=1; $i<=$total_files; $i++) {
                 fwrite($fp, file_get_contents($temp_dir.'/'.$fileName.'.part'.$i));
                 _log('writing chunk '.$i);
@@ -142,7 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if(!(isset($_GET['resumableIdentifier']) && trim($_GET['resumableIdentifier'])!='')){
         $_GET['resumableIdentifier']='';
     }
-    $temp_dir = '../Presentation/'.$_GET['resumableIdentifier'];
+    $temp_dir = $GLOBALS['uploadDir'].$GLOBALS['ds'].$_GET['resumableIdentifier'];
     if(!(isset($_GET['resumableFilename']) && trim($_GET['resumableFilename'])!='')){
         $_GET['resumableFilename']='';
     }
@@ -168,7 +169,7 @@ if (!empty($_FILES)) foreach ($_FILES as $file) {
 
     // init the destination file (format <filename.ext>.part<#chunk>
     // the file is stored in a temporary directory
-    $temp_dir = '../Presentation/temp';
+    $temp_dir = $GLOBALS['uploadDir'].$GLOBALS['ds'].'temp';
     if(isset($_POST['resumableRelativePath']) && trim($_POST['resumableRelativePath'])!=''){
         $dest_file = $temp_dir.'/'.$_POST['resumableRelativePath'].'.part'.$_POST['resumableChunkNumber'];
     }

@@ -3,640 +3,77 @@
 <title>WebPresent - Controller</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
 <!-- jQuery library -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
 <!-- Latest compiled JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
 <!-- Custom styles for this template -->
 <link href="../css/slate.css" rel="stylesheet">
+
 <!-- Local JS pages -->
 <script type="text/javascript" src="../js/utils.js"></script>
 <script type="text/javascript" src="../js/reconnecting-websocket.min.js"></script>
 <script type="text/javascript" src="../js/config.js?"></script>
-
-<!--------------------------------------------------------
-									DEVELOPER NOTES
-----------------------------------------------------------
-More comments are needed throughout this document.
-Need to standardise the code formatting.
-Currently implementing video controls.
-System only accepts video's and images. Web pages are for 
-setting display to black.
---------------------------------------------------------->
-
-<script type="text/javascript">
-/*--------------------------------------------------------
-										Variable Decliration
---------------------------------------------------------*/
-var currentSlideName = "";								//Tracks the name of the current file
-var currentSlideType = "";								//Tracks the type of the current file
-var nextSlideName = "";										//Tracks the name of the next file
-var nextSlideType = "";										//Tracks the type of the next file
-var mediaFilePath = "../Presentation/";			//The path to the root folder where media items are kept
-var webFilePath = "";											//The path to the root folder where webpages are kept
-var playVideo = "Play";										//Standard command to Play a video
-var pauseVideo = "Pause";									//Standard command to Pause a video
-var muteVideo = "Mute";										//Standard command to Mute a video
-var unmuteVideo = "Unmute";								//Standard command to Unmute a video
-var endPage = "black.html"								//Black HTML page used to set the screens to black
-var webpageFiletypes = ["htm", "html"];						//An array to track all the avaliable webpage types
-var videoFiletypes = ["mp4", "webm"];							//An array to track all the avaliable video types
-var imageFiletypes= ["jpg", "png", "gif", "bmp"];	//An array to track all the avaliable image types
-
-
-/*--------------------------------------------------------
-									Start Presentation
-----------------------------------------------------------
-This method sets the current slide to a blank, default page
-and the next slide to the first slide in the deck. The next
-slide is buffered in the hidden frame, ready to be displayed
-once loaded.
---------------------------------------------------------*/
-function startPresentation()
-{
-	var index = 0;
-
-	//Assign the currentSlideImage to the endPage and send/swap
-	nextSlideName = endPage;
-	nextSlideType = "html";
-	currentSlideName = nextSlideName;
-	currentSlideType = nextSlideType;
-	
-	displayWebPreview("current", webFilePath, currentSlideName);
-	
-	//Assign the first element of the slide deck to next variable
-	$('#order').children('input').each(function() 
-	{
-		index++;
-		if (index == 1)
-		{
-			//Assign next variables
-			nextSlideName = this.id;
-			nextSlideType = this.id.substr(this.id.lastIndexOf('.') + 1);	
-		}
-	});
-	
-	if (validateFiletype(videoFiletypes, nextSlideType))
-	{
-		displayVideoPreview("next", mediaFilePath, nextSlideName);
-		setTimeout(sendVideo, 100);
-		//DEVELOPER NOTES: MAY NEED A VIDEOPAUSE HERE. NEEDS TESTING.
-	}
-	else if (validateFiletype(webpageFiletypes, nextSlideType))
-	{
-		displayWebPreview("next", webFilePath, nextSlideName);
-		setTimeout(sendURL, 100);
-	}
-	else if (validateFiletype(imageFiletypes, nextSlideType))
-	{
-		displayImagePreview("next", mediaFilePath, nextSlideName);
-		setTimeout(sendImage, 100);
-	}
-	else 
-	{
-		alert("File Type Error: " + nextSlideName + "has a filetype of " + nextSlideType + ", which isn't a valid filetype");
-	}
-}
-
-/*--------------------------------------------------------
-										Process Load Slide
-----------------------------------------------------------
-The purpose of this method is to process it to display the 
-slide currently in the "Next Slide" section of the interface.
-It sets the current slide to the next slide, then looks through
-the slide deck and determines what the new next slide will be.
-It swaps the frames and then loads the next slide into the
-hidden frame.
---------------------------------------------------------*/
-$(document).ready(function() 
-{
-	$("#loadSlide").click(function() 
-	{
-		//Disable the loadSlide button
-		$("#loadSlide").attr("disabled", true);
-		$("#loadSlide").val("Loading...");
-	
-		if (validateFiletype(videoFiletypes, currentSlideType))
-		{
-			sendVideoControl(pauseVideo);
-		}
-		
-		//Swap the frames
-		sendSwap();
-		
-		//Set the current slide to the next slide
-		currentSlideName = nextSlideName;
-		currentSlideType = nextSlideType;
-		
-		//Set the next slide to the next slide in the presentation play list
-		var presentationOrder = document.getElementById("order").childNodes;
-		var fileFound;
-		var index;
-
-		for (index = 0; index < presentationOrder.length; index++) 
-		{
-			if (currentSlideName == presentationOrder[index].id && !(fileFound))
-			{
-				index++;
-				if (index < presentationOrder.length) 
-				{				
-					fileFound = true;
-					nextSlideName = presentationOrder[index].id;
-					nextSlideType = presentationOrder[index].id.substr(presentationOrder[index].id.lastIndexOf('.') + 1);
-				}
-			}
-		}		
-		
-		//If the next slide is the end of the slide deck, display the last slide again
-		if (!fileFound)
-		{
-			nextSlideName = presentationOrder[presentationOrder.length-1].id;
-			nextSlideType = presentationOrder[presentationOrder.length-1].id.substr(presentationOrder[presentationOrder.length-1].id.lastIndexOf('.') + 1);	
-		}
-
-		//Set the current slide preview window
-		if (validateFiletype(videoFiletypes, currentSlideType))
-		{
-				displayVideoPreview("current", mediaFilePath, currentSlideName);
-				//DEVELOPER NOTES: NEEDS TO BE CHECKED
-				sendVideoControl(playVideo);
-				sendVideoControl(unmuteVideo);
-		}
-		else if (validateFiletype(webpageFiletypes, currentSlideType))
-		{
-			displayWebPreview("current", webFilePath, currentSlideName);
-		}
-		else if (validateFiletype(imageFiletypes, currentSlideType))
-		{
-			displayImagePreview("current", mediaFilePath, currentSlideName);
-		}
-		else 
-		{
-			alert("File Type Error: " + currentSlideName + "has a filetype of " + currentSlideType + ", which isn't a valid filetype");
-		}
-		
-		//Set the next slide preview window & buffer slide
-		if (validateFiletype(videoFiletypes, nextSlideType))
-		{
-			displayVideoPreview("next", mediaFilePath, nextSlideName);
-			setTimeout(sendVideo, 1000);
-		}
-		else if (validateFiletype(webpageFiletypes, nextSlideType))
-		{
-			displayWebPreview("next", webFilePath, nextSlideName);
-			setTimeout(sendURL, 1000);
-		}	
-		else if (validateFiletype(imageFiletypes, nextSlideType))
-		{
-			displayImagePreview("next", mediaFilePath, nextSlideName);
-			setTimeout(sendImage, 1000);
-		}	
-		else 
-		{
-			alert("File Type Error: " + nextSlideName + "has a filetype of " + nextSlideType + ", which isn't a valid filetype");
-		}
-			
-		//Highlight the current slide in the slide deck
-		$('#order').children('input').each(function() 
-		{
-			if (currentSlideName == this.id)
-			{				
-				$(this).css("color", "#f7f325");
-			}
-			else
-			{
-				$(this).css("color", "white");
-			}
-		});
-		
-		//Indent the next slide in the slide deck
-		$('#order').children('input').each(function() 
-		{
-			if (currentSlideName == this.id)
-			{				
-				$(this).addClass("btn-primary-hovered");
-			}
-			else
-			{
-				$(this).removeClass("btn-primary-hovered");
-
-			}
-		});
-		
-		//Enable the loadSlide button
-		setTimeout(function()
-		{ 
-			$("#loadSlide").attr("disabled", false); 
-			$("#loadSlide").val("Load Next Slide");
-		}, 1100);
-	});
-});
-
-/*--------------------------------------------------------
-											Preview Slide
-----------------------------------------------------------
-Processes the Preview Slide deck. This function loads the 
-elements of the slide deck into a HTML object. It then 
-iterates through them to find the one the user clicked.
-once found it sets the slide preview to that specific slide
-and then buffers it in the hidden iFrame.
---------------------------------------------------------*/
-function previewSlide(clicked_id) 
-{
-	var index = 0;
-	
-	//Set the current to the next fields
-	nextSlideName = currentSlideName;
-	nextSlideType = currentSlideType;
-	
-	//Loop through each element in the slide deck & assign variables
-	$('#order').children('input').each(function() 
-	{
-		index++;
-    if (clicked_id == this.id)
-		{
-			nextSlideName = this.id;
-			nextSlideType = this.id.substr(this.id.lastIndexOf('.') + 1);
-			//$(this).addClass("btn-primary-hovered");
-		}
-		else
-		{
-			//$(this).removeClass("btn-primary-hovered");
-		}
-	});
-	
-	//Set the next slide preview picture & buffer slide
-	if (validateFiletype(videoFiletypes, nextSlideType))
-	{
-		displayVideoPreview("next", mediaFilePath, nextSlideName);
-		setTimeout(sendVideo, 1000);
-	}
-	else if (validateFiletype(webpageFiletypes, nextSlideType))
-	{
-		displayWebPreview("next", webFilePath, nextSlideName);
-		setTimeout(sendURL, 1000);
-	}	
-	else if (validateFiletype(imageFiletypes, nextSlideType))
-	{
-		displayImagePreview("next", mediaFilePath, nextSlideName);
-		setTimeout(sendImage, 1000);
-	}	
-	else 
-	{
-		alert("File Type Error: " + nextSlideName + "has a filetype of " + nextSlideType + ", which isn't a valid filetype");
-	}
-}
-
-/*--------------------------------------------------------
-										Load Preview Slide
-----------------------------------------------------------
-Loads the Preview Slide deck. This function loads the 
-presentationOrder file from the Server into a JSON object.
-The file is written as a parseable array and can be iterated
-through. The function iterates through the array and for each
-element in it, it creates a button in the Preview Slide Deck 
-with it's value and ID equal to the data in the file. 
---------------------------------------------------------*/
-
-function loadSlidePreview()
-{
-  var xmlhttp = new XMLHttpRequest();
-  xmlhttp.onreadystatechange = function() 
-	{
-		if (this.readyState == 4 && this.status == 200) 
-		{
-			var presentationOrder = JSON.parse(this.responseText);
-			var arrayLength = presentationOrder.length;
-			
-			//For each element in the notepad document, add it to the Slide Deck
-			for (index = 0; index < arrayLength; index++) 
-			{
-				document.getElementById("order").innerHTML += ("<input type='button' class='btn btn-primary btn-md btn-block' onClick='previewSlide(this.id)' id='" + presentationOrder[index] + "' value='" + presentationOrder[index] + "' />");  
-			}
-			
-			//Add a Set To Black button to the Slide Deck
-			document.getElementById("order").innerHTML += ("<input type='button' class='btn btn-primary btn-md btn-block' onClick='previewSlide(this.id)' id='" + endPage + "' value='Set Displays to Black'/>");
-			
-		}
-	};
-	xmlhttp.open("GET", "../presentationOrder.txt", true);
-	xmlhttp.send();
-}
-
-/*--------------------------------------------------------
-							Handle Transition Type
-----------------------------------------------------------
-This method sends the transition type to the display clients.
-Once the radio button selects a new option, it sends that 
-option to the display client.
---------------------------------------------------------*/
-$(document).ready(function() 
-{
-	$('input[type=radio][name=transitionType]').change(function() {
-			sendTransition(this.value);
-  });
-});
-
-/*--------------------------------------------------------
-												Initialise
-----------------------------------------------------------
-The purpose of this function it to load up the needed 
-elements for the page. It connects to the Relay and then
-hide specific UI elements. It then loads the slide preview
-and starts the presentation.
---------------------------------------------------------*/
-function initialise() 
-{
-	connectToRelay();
-	
-	//NEED TO ASK ALF WHAT THIS FUNCTION DOES
-  function handleMesg( data ) {
-    //console.log('data:' + data);
-    var cmd = data.charAt(0);
-    if (data.length > 1) { // command with argument
-      var arg = data.substring(1, data.length);
-      switch (cmd) {
-        case 'Y':
-          //console.log('ytTime:' + arg);
-          //handleYoutubeTime(arg);
-          break;
-      }
-    }
-  }
-	
-	//Set loading images
-	$("#currentSlideImage").attr('src', mediaFilePath + "start.jpg");
-	  
-	//Hide preview frames
-	$("#currentSlideHTML").hide();
-	$("#previewSlideHTML").hide();
-	$("#currentSlideImage").hide();
-	$("#previewSlideImage").hide();
-	$("#currentSlideVideo").hide();
-	$("#previewSlideVideo").hide();
-	
-	//STUFF THAT CAN BE DELETED LATER
-	$("#Swap").show();
-	
-	//Load up the slide preview
-	loadSlidePreview();
-	
-	//Load up the initial slides
-	setTimeout(startPresentation, 300);
-}
-
-/*--------------------------------------------------------
-										Validate Filetype
-----------------------------------------------------------
-COMMENTS
---------------------------------------------------------*/
-function validateFiletype(filetypeArray, filetype) 
-{
-	for (var index = 0; index < filetypeArray.length; index++)
-	{
-		if (filetype == filetypeArray[index])
-		{
-			return true;
-		}
-	}
-	
-	return false;
-}
-
-/*--------------------------------------------------------
-										Display Image Preview
-----------------------------------------------------------
-COMMENTS
---------------------------------------------------------*/
-function displayImagePreview(previewWindowName, filePath, filename) 
-{
-	$("#" + previewWindowName + "SlideImage").attr('src', filePath + filename);
-	$("#" + previewWindowName + "SlideImage").show();
-	$("#" + previewWindowName + "SlideWebpage").hide();
-	$("#" + previewWindowName + "SlideVideo").hide();
-}
-
-/*--------------------------------------------------------
-										Display Web Preview
-----------------------------------------------------------
-COMMENTS
---------------------------------------------------------*/
-function displayWebPreview(previewWindowName, filePath, filename) 
-{
-	$("#" + previewWindowName + "SlideWebpage").attr('src', filePath + filename);
-	$("#" + previewWindowName + "SlideWebpage").show();
-	$("#" + previewWindowName + "SlideImage").hide();
-	$("#" + previewWindowName + "SlideVideo").hide();
-}
-
-/*--------------------------------------------------------
-									 Display Video Preview
-----------------------------------------------------------
-COMMENTS
---------------------------------------------------------*/
-function displayVideoPreview(previewWindowName, filePath, filename) 
-{
-	$("#" + previewWindowName + "SlideVideo").attr('src', filePath + filename);
-	$("#" + previewWindowName + "SlideVideo").show();
-	$("#" + previewWindowName + "SlideImage").hide();
-	$("#" + previewWindowName + "SlideWebpage").hide();
-}
-
-/*--------------------------------------------------------
-													Send URL
-----------------------------------------------------------
-The purpose of this function is to send the next HTML slide
-to the display clients. The letter U is the indication to
-client that it is a HTML page/URL. The filepath is appended 
-to it as well as the filename.
---------------------------------------------------------*/
-function sendURL() 
-{
-	socketSend('U' + webFilePath + nextSlideName);
-}
-
-/*--------------------------------------------------------
-								     SEND HTML (DELETE?)
-----------------------------------------------------------
-FILL IN
---------------------------------------------------------*/
-function sendHTML() 
-{
-	socketSend('H' + html);
-
-}
-
-/*--------------------------------------------------------
-												Send Image
-----------------------------------------------------------
-The purpose of this function is to send the next image slide
-to the display clients. The letter I is the indication to
-client that it is an image. The filepath is appended to it
-as well as the filename.
---------------------------------------------------------*/
-function sendImage() 
-{
-	socketSend('I' +  mediaFilePath + nextSlideName);
-}
-
-/*--------------------------------------------------------
-										  Send Video
-----------------------------------------------------------
-The purpose of this function is to send the next video slide
-to the display clients. The letter V is the indication to
-client that it is a video. The filepath is appended to it
-as well as the filename.
---------------------------------------------------------*/
-function sendVideo() 
-{
-	socketSend('V' + mediaFilePath + nextSlideName);
-}
-
-/*--------------------------------------------------------
-										Send Transition
-----------------------------------------------------------
-The purpose of this method is to send the transition type 
-to the client. The T is the indication to the client that 
-it is a transition message. The transition type is then
-appended to it.
---------------------------------------------------------*/
-function sendTransition(transitionType) 
-{
-	socketSend('T' + transitionType);
-}
-
-/*--------------------------------------------------------
-										TESTING VIDEO CONTROLS
-----------------------------------------------------------
-THIS WILL BE DELETED ONCE A WORKING VIDEO CONTROL INTERFACE
-IS CREATED. FUNCTION WILL WORK DIFFERENTLY.
---------------------------------------------------------*/
-
-$(document).ready(function() 
-{
-	var vid = document.getElementById("currentSlideVideo");
-	
-	vid.onplay = function() 
-	{
-		sendVideoControl(playVideo);
-	};
-	
-	vid.onpause = function() 
-	{
-		sendVideoControl(pauseVideo);
-	};
-	
-	vid.onvolumechange = function() 
-	{
-		if (vid.muted == true)
-		{
-			sendVideoControl(muteVideo);
-		}
-		else if (vid.muted == false)
-		{
-			sendVideoControl(unmuteVideo);
-		}
-	};
-	
-	vid.onseeked = function()
-	{
-		//alert(vid.currentTime);
-	}
-})
-
-/*--------------------------------------------------------
-										Send Video Controls
-----------------------------------------------------------
-The purpose of this function is to send a video control 
-to the client. The letter V is the indication to the client
-that it is a video based message. It then appends to passed
-in control option to the message.
---------------------------------------------------------*/
-function sendVideoControl(controlOption) 
-{
-	socketSend('V' + controlOption);
-}
-
-/*--------------------------------------------------------
-												Send Reload
-----------------------------------------------------------
-FILL IN, WILL BE IMPLEMENTED AT SOME STAGE
---------------------------------------------------------*/
-function sendReload() 
-{
-  socketSend('R');
-}
-
-/*--------------------------------------------------------
-												Send Swap
-----------------------------------------------------------
-The purpose of this function is to tell the client to swap
-the visible and invisible frames. The letter S is the
-indiciation to the client that a swap request has been sent.
---------------------------------------------------------*/
-function sendSwap() 
-{
-  socketSend("S");
-}
-</script>
+<script type="text/javascript" src="../js/controller.js"></script>
 
 <style></style>
 </head>
 <body onLoad="initialise()">
 <br>
-<div class="container" style="width: 100%; margin-top: 30px; margin-bottom: 30px; margin-left: 1%; margin-right: 1%">
+<div class="topnav1">
+    <a class="active" href="controller.html">Controller</a>
+	<a href="uploader.html">Uploader</a>
+	<a href="display.html">Display</a>
+	<input style="margin-top:14px; margin-right:30px; float:right" type="button" disabled class="circle" id="RelayStatus"/>
+    <input type="button" style="margin-top:14px; margin-right:10px; float:right; border: none; background-color:transparent; color:#c8c8c8" disabled id="RelayConnection"/>	
+</div>
+<div class="container" style="width: 98%; margin-left: 1%; margin-right: 1%">
 	<div class="row">
 	    <div class="col-md-10">
 	        <div class="row">
-			    <div class="col-md-4">
-			    <ul>
-			        <li><a class="active" href="controller.html">Controller</a></li>
-				    <li><a href="uploader.html">Uploader</a></li>
-				    <li><a href="display.html">Display</a></li>
-			    </ul>
-			        </br>
-			        <input type='button' disabled class='circle' id='RelayStatus'/>
-		        </div>
-			    <div class="col-md-8">
-					<h1>WebPresent Controller</h1>
+			    <div class="col-md-12">    
+					<h1 align="center" style="margin-top:-45px; margin-left:215px">WebPresent Controller</h1>
 			    </div>
 	        </div>
 	        <div class="row">
 		        <div class="col-md-6">
-			        <h3 align="center">Current Slide</h3>
+			        <h3 id="currentSlideHeading" style="margin-top:20px" align="center" hidden>Current Slide</h3>
+			        <span class="error" id="currentError" hidden></span>
 			        <iframe id="currentSlideWebpage" style="min-width: 100%; min-height: 100%" src="" class="embed-responsive-item" hidden></iframe>
 			        <image id="currentSlideImage" style="min-width: 100%; min-height: 100%" src="" class="img-responsive" allowtransparency="true" hidden></image>
-			        <video id='currentSlideVideo' style="max-width: 100%; max-height: 100%" autoplay="autoplay" loop preload="metadata" class="embed-responsive-item" muted controls hidden><source src="" type="video/mp4"></video>
-			<!-- <input type="button" style="width: 140px" class="btn btn-primary btn-md" id="Swap" value="Send Swap (Test)" onclick="sendSwap(0);" /> -->
+			        <video id='currentSlideVideo' style="max-width: 100%; max-height: 100%" autoplay="autoplay" preload="metadata" class="embed-responsive-item" controls controlsList="nodownload nofullscreen" hidden><source src="" type="video/mp4"></video>
 		        </div>
 		        <div class="col-md-6">
-			        <h3 align="center">Next Slide</h3>
+			        <h3 id="nextSlideHeading" style="margin-top:20px" align="center" hidden>Next Slide</h3>
+			        <span class="error" id="nextError" hidden></span>
 			        <iframe id="nextSlideWebpage" style="min-width: 100%; min-height: 100%" src="" class="embed-responsive-item" hidden></iframe>
 			        <image id="nextSlideImage" style="min-width: 100%; min-height: 100%" src="" class="img-responsive" allowtransparency="true" hidden></image>
-			        <video id='nextSlideVideo' style="max-width: 100%; max-height: 100%" loop preload="metadata" class="embed-responsive-item" muted controls hidden><source src="" type="video/mp4"></video>
+			        <video id='nextSlideVideo' style="max-width: 100%; max-height: 100%" preload="metadata" class="embed-responsive-item" muted controls controlsList="nodownload nofullscreen" hidden><source src="" type="video/mp4"></video>
 			        <br/><br/>
 			        <br/><br/>
-			        </br></br>
+			        <br/><br/>
 		        </div>
 		    </div>
         </div>		        
 		<div class="col-md-2">
-			<div id="order" style="width: 175px; max-height: 425px; overflow-y: scroll;">
+		    </br>
+			<div id="order" style="margin-top: 10px; width: 100%; max-height: 425px; overflow-y: scroll;">
 				<!-- Slide Deck is created in here -->
 			</div>
-	        <div>
-		        <h4>Transition:</h4>
-		        <input type="radio" id="transitionType" name="transitionType" value="instant" checked="checked">Instant<br>
-		        <input type="radio" id="transitionType" name="transitionType" value="blend">Blend<br>
-		        </br>
+	        <div id="transitionDiv" hidden>
+		        <h4><u>Transition Type</u></h4>
+		        <input type="radio" id="transitionType" name="transitionType" value="instant" checked="checked" />Instant<br>
+		        <input type="radio" id="transitionType" name="transitionType" value="blend" />Blend<br></br>
 			    <input type="button" style="width: 163px" class="btn btn-primary btn-md" id="loadSlide" value="Load Next Slide" />
 		    </div>
 	    </div>		    
 	</div>
 </div>
-<!-- Config from settings.js
-<pre><div id="config"></div></pre> -->
 </body>
 </html>
