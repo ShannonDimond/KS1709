@@ -15,7 +15,7 @@ function getQueryStringVars() {
         
     for ( var i=0; i < get.length; i++ ) {
         var pair = get[ i ].split( "=" );
-        server_variables[ pair[ 0 ] ] = unescape( pair[ 1 ] );
+        server_variables[ pair[ 0 ] ] = ( pair[ 1 ] );
     }
 
     return server_variables;
@@ -42,12 +42,18 @@ function connectToRelay() {
     if (document.getElementById('RelayStatus')) {
       document.getElementById('RelayStatus').style.backgroundColor = '#80ff80';
     }
+    if (document.getElementById('RelayConnection')) {
+      document.getElementById('RelayConnection').value = 'Connected';
+    }
   }
 
   webSocket.onclose = function() {
     socketOpen = false;
     if (document.getElementById('RelayStatus')) {
       document.getElementById('RelayStatus').style.backgroundColor = '#ff8080';
+    }
+    if (document.getElementById('RelayConnection')) {
+      document.getElementById('RelayConnection').value = 'Not Connected';
     }
   }
 

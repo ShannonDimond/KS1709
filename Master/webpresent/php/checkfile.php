@@ -1,6 +1,6 @@
 <?php
 
-$uploadDir = $_SERVER['DOCUMENT_ROOT']."/webpresent/Presentation";
+require 'variables.php';
 
 $file = $_GET['url'];
 // check if the file requested exists or not

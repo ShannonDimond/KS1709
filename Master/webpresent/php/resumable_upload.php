@@ -19,8 +19,7 @@
  * @email meetbivek@gmail.com
  */
 
- $upload_dir = $_SERVER['DOCUMENT_ROOT'].'/webpresent/Presentation/';
-
+require 'variables.php';
 
 ////////////////////////////////////////////////////////////////////
 // THE FUNCTIONS
@@ -108,6 +107,7 @@ function createFileFromChunks($temp_dir, $fileName, $chunkSize, $totalSize,$tota
     // create the final destination file ]
         if (!is_dir(dirname("../Presentation/".$fileName))) {
             mkdir(dirname("../Presentation/".$fileName), 0777, true);
+	    chmod(dirname("../Presentation/".$fileName), 0777);
         }
         if (($fp = fopen("../Presentation/".$fileName, 'w')) !== false) {
             for ($i=1; $i<=$total_files; $i++) {

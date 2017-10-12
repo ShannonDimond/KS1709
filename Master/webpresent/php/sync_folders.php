@@ -1,8 +1,6 @@
 <?php
 
-$ds = "/";
-$uploadDir = $_SERVER['DOCUMENT_ROOT'].'/webpresent/Presentation';
-$fileName = $_SERVER['DOCUMENT_ROOT'].'/webpresent/presentationOrder.txt';
+require 'variables.php';
 
 if(!file_exists($fileName)) {
     $file = fopen($fileName, "w");
@@ -59,6 +57,8 @@ switch($method) {
         $new_config = array();
 
         // request to reorder the folders
+        // the desired order is passed via $_POST['folder_order']
+        // new array is being made according to this new order
         if(isset($_POST['folder_order'])) {
             $folder_order = explode("\r\n", $_POST['folder_order']);
 
