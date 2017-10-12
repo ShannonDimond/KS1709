@@ -1,3 +1,5 @@
 [
-
+    "Slide1.jpg",
+    "Slide2.jpg",
+    "Slide3.jpg"
 ]
