@@ -7,7 +7,7 @@ var fileAdded = 0, fileUploaded = 0;
 var r = new Resumable({
     target: '../php/resumable_upload.php',
     query: { upload_token: 'files' },
-    fileType: ['jpeg','jpg','png','webm', 'mp4']
+    fileType: ['jpeg','jpg','png','webm', 'mp4', 'JPG']
 });
 
 
@@ -137,6 +137,11 @@ function syncFolders() {
                 files = JSON.parse(xmlhttp.responseText);
                 document.getElementById("folder_list").innerHTML = "";
                 folders = [];
+
+		if (files.length == 0){
+		    $("#delete_all").hide();
+		}
+                
                 for (file in files) {
                     // getting the folder name
                     // if files[file] = 'media/presentations/slides1/presentations.png
