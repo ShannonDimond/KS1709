@@ -137,6 +137,10 @@ function syncFolders() {
                 files = JSON.parse(xmlhttp.responseText);
                 document.getElementById("folder_list").innerHTML = "";
                 folders = [];
+
+		if (files.length == 0){
+		    $("#delete_all").hide();
+		}
                 
                 for (file in files) {
                     // getting the folder name

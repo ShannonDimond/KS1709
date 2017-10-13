@@ -12,6 +12,7 @@ ul#folder_list li{
     margin: 4px;
     padding: 8px;
     color: white;
+    border-radius: 5px;
 }
 
 #uploading_file {

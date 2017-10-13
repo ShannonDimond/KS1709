@@ -1,8 +1,8 @@
 <?php
-
+$serverPath = $_SERVER['DOCUMENT_ROOT'].'/webpresent/';
 $ds = "/";
-$uploadDir = $_SERVER['DOCUMENT_ROOT'].'/webpresent/Presentation';
-$fileName = $_SERVER['DOCUMENT_ROOT'].'/webpresent/presentationOrder.txt';
+$uploadDir = $serverPath.'Presentation';
+$fileName = $serverPath.'/presentationOrder.txt';
 
 
 ?>
