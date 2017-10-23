@@ -29,7 +29,7 @@ var unmuteVideo = "Unmute";								//Standard command to Unmute a video
 var endPage = "black.jpg"									//Black HTML page used to set the screens to black
 var startPage = "start.png"								//Standard starting slide when no preview is avaliable
 var loadingName = "loadingSlide.png";			//A slide to be used as a temporary loading message
-var slideDeck = "presentationOrder.txt"		//The name of the slide deck database file
+var slideDeck = "presentationOrder.json"		//The name of the slide deck database file
 var webpageFiletypes = ["htm", "html"];		//An array to track all the avaliable webpage types
 var videoFiletypes = ["mp4", "webm"];			//An array to track all the avaliable video types
 var imageFiletypes= ["jpg", "png", "gif", "bmp"];		//An array to track all the avaliable image types
@@ -797,7 +797,7 @@ function displayNextSlide(filename, fileValidity, contentType, path, delay)
 									Display Error Page
 ----------------------------------------------------------
 The purpose of this method is to display appropiate error
-messages regarding the state of the presentationOrder.txt 
+messages regarding the state of the presentationOrder.json 
 file. Depending upon the input paramater a different error
 message is displayed on the screen. It then disables the 
 slide deck and sets the color of any text in it to red.

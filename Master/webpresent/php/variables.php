@@ -2,7 +2,7 @@
 $serverPath = $_SERVER['DOCUMENT_ROOT'].'/webpresent/';
 $ds = "/";
 $uploadDir = $serverPath.'Presentation';
-$fileName = $serverPath.'/presentationOrder.txt';
+$fileName = $serverPath.'presentationOrder.json';
 
 
 ?>
