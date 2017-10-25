@@ -5561,6 +5561,7 @@ button.list-group-item-danger.active:focus {
 .panel > .table:first-child > thead:first-child > tr:first-child td:first-child,
 .panel > .table-responsive:first-child > .table:first-child > thead:first-child > tr:first-child td:first-child,
 .panel > .table:first-child > tbody:first-child > tr:first-child td:first-child,
+
 .panel > .table-responsive:first-child > .table:first-child > tbody:first-child > tr:first-child td:first-child,
 .panel > .table:first-child > thead:first-child > tr:first-child th:first-child,
 .panel > .table-responsive:first-child > .table:first-child > thead:first-child > tr:first-child th:first-child,
@@ -6443,6 +6444,7 @@ button.close {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 .carousel-caption .btn {
+
   text-shadow: none;
 }
 @media screen and (min-width: 768px) {
@@ -7392,6 +7394,12 @@ h1.error
 		text-transform: uppercase;
 		font-size: 250%;
 		font-family: "Arial Black";
+}
+
+@media all and (max-width: 1000px) {
+
+    .heading{display:none;}
+
 }
 
 p.error

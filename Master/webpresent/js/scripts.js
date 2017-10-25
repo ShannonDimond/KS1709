@@ -7,7 +7,7 @@ var fileAdded = 0, fileUploaded = 0;
 var r = new Resumable({
     target: '../php/resumable_upload.php',
     query: { upload_token: 'files' },
-    fileType: ['jpeg','jpg','png','webm', 'mp4', 'JPG']
+    fileType: ['jpeg','jpg','png','webm', 'mp4', 'JPEG', 'JPG', 'PNG', 'WEBM', 'MP4']
 });
 
 
